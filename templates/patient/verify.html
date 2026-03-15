@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Vérification dossier — REMEDY{% endblock %}
+{% block public_bg %}bg-gradient-to-b from-slate-50 via-white to-brand-50/20{% endblock %}
+
+{% block content_public %}
+{% load static %}
+<div class="min-h-screen w-full px-4 py-6 sm:py-10 flex flex-col items-center safe-area-pad" style="padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); padding-bottom: max(1.5rem, env(safe-area-inset-bottom));">
+    <!-- Logo & phrase -->
+    <div class="text-center mb-6 sm:mb-8">
+        <img class="mx-auto h-16 sm:h-20 w-auto" src="{% static 'img/remedi-logo-banner.png' %}" alt="REMEDY" loading="eager">
+        <p class="mt-3 text-sm sm:text-base text-slate-600 font-medium">Plateforme Anti-Fraude Réclamations Santé</p>
+    </div>
+
+    <!-- Card container: mobile-first, max-width on desktop -->
+    <div class="w-full max-w-md flex-1 flex flex-col">
+        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex-1 flex flex-col">
+
+            {% if invalid %}
+                <!-- État : lien invalide / expiré -->
+                <div class="flex-1 flex flex-col justify-center p-6 sm:p-8 text-center">
+                    {% if link_used_outcome == 'already_confirmed' %}
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 mb-6"><i class="bi bi-check-circle text-4xl text-emerald-500"></i></div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Lien déjà utilisé</h2>
+                    <p class="mt-3 text-base text-slate-600 leading-relaxed">Vous aviez déjà <strong>validé</strong> cette réclamation. Le dossier est en cours de traitement pour le paiement. Si vous avez une question, contactez votre prestataire ou votre assurance.</p>
+                    {% elif link_used_outcome == 'already_disputed' %}
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 mb-6"><i class="bi bi-exclamation-triangle text-4xl text-amber-500"></i></div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Lien déjà utilisé</h2>
+                    <p class="mt-3 text-base text-slate-600 leading-relaxed">Vous aviez déjà <strong>contesté</strong> cette réclamation. Elle a été signalée à votre assurance. Si vous avez une question, contactez votre prestataire ou votre assurance.</p>
+                    {% elif link_used_outcome == 'expired' %}
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 mb-6"><i class="bi bi-clock-history text-4xl text-red-500"></i></div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Lien expiré</h2>
+                    <p class="mt-3 text-base text-slate-600 leading-relaxed">Ce lien n'est plus valide. Si vous avez une question, contactez votre prestataire ou votre assurance.</p>
+                    {% else %}
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 mb-6"><i class="bi bi-link-45deg text-4xl text-red-500"></i></div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Lien invalide</h2>
+                    <p class="mt-3 text-base text-slate-600 leading-relaxed">Ce lien a déjà été utilisé ou n’est plus valide. Si vous avez une question, contactez votre prestataire ou votre assurance.</p>
+                    {% endif %}
+                </div>
+
+            {% elif done == "confirmed" %}
+                <!-- État : confirmation enregistrée -->
+                <div class="flex-1 flex flex-col justify-center p-6 sm:p-8 text-center">
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 mb-6">
+                        <i class="bi bi-check-circle-fill text-5xl text-emerald-500"></i>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Merci, c’est enregistré</h2>
+                    <p class="mt-3 text-base text-slate-600 leading-relaxed">Votre validation a bien été prise en compte. Le dossier est validé pour la suite du paiement.</p>
+                </div>
+
+            {% elif done == "disputed" %}
+                <!-- État : contestation enregistrée -->
+                <div class="flex-1 flex flex-col justify-center p-6 sm:p-8 text-center">
+                    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 mb-6">
+                        <i class="bi bi-exclamation-triangle-fill text-5xl text-amber-500"></i>
+                    </div>
+                    <h2 class="text-lg sm:text-xl font-semibold text-slate-900">Signalement reçu</h2>
+                    <p class="mt-3 text-base text-slate-600 leading-relaxed">Votre contestation a été enregistrée. Le dossier sera vérifié par votre assurance.</p>
+                </div>
+
+            {% else %}
+                <!-- Formulaire de validation -->
+                <div class="bg-gradient-to-br from-brand-500 via-brand-600 to-brand-800 py-6 sm:py-8 px-6 text-center text-white">
+                    <i class="bi bi-file-earmark-medical text-5xl sm:text-6xl mb-3 opacity-95"></i>
+                    <h2 class="text-lg sm:text-xl font-semibold">Réclamation médicale</h2>
+                    <p class="text-sm sm:text-base opacity-90 mt-1">Dossier #{{ claim.id }}</p>
+                </div>
+
+                <div class="flex-1 p-5 sm:p-8">
+                    <p class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Récapitulatif</p>
+                    <dl class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                            <dt class="text-base text-slate-600 flex items-center gap-2"><i class="bi bi-person text-slate-400"></i> Patient</dt>
+                            <dd class="text-base font-semibold text-slate-900 text-right">{{ claim.patient.full_name }}</dd>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                            <dt class="text-base text-slate-600 flex items-center gap-2"><i class="bi bi-building text-slate-400"></i> Prestataire</dt>
+                            <dd class="text-base font-semibold text-slate-900 text-right">{{ provider_display|default:claim.provider.username }}</dd>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-slate-100">
+                            <dt class="text-base text-slate-600 flex items-center gap-2"><i class="bi bi-tags text-slate-400"></i> Catégorie</dt>
+                            <dd class="text-base font-semibold text-slate-900 text-right">{{ claim.category.name }}</dd>
+                        </div>
+
+                        {% if ipm_share is not None %}
+                        <div class="mt-6 rounded-2xl bg-slate-50 border border-slate-100 p-5 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-base text-slate-600">Montant total</span>
+                                <span class="text-lg font-bold text-brand-600">{{ claim.total_amount }} FCFA</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-base text-slate-600">Prise en charge IPM ({{ coverage_percent }}%)</span>
+                                <span class="text-base font-semibold text-emerald-600">{{ ipm_share }} FCFA</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-4 mt-2 border-t-2 border-slate-200">
+                                <span class="text-base font-semibold text-slate-900">Votre part à payer</span>
+                                <span class="text-xl font-bold text-amber-600">{{ patient_share }} FCFA</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="flex justify-between items-center py-4 mt-2 border-t-2 border-slate-200">
+                            <span class="text-base font-semibold text-slate-900">Montant à payer</span>
+                            <span class="text-xl font-bold text-brand-600">{{ claim.total_amount }} FCFA</span>
+                        </div>
+                        {% endif %}
+                    </dl>
+
+                    <div class="mt-6 rounded-xl bg-blue-50 border border-blue-100 p-4 flex gap-3">
+                        <i class="bi bi-info-circle-fill text-blue-500 text-xl flex-shrink-0 mt-0.5"></i>
+                        <p class="text-sm text-blue-900 leading-relaxed">Vérifiez ces informations. En confirmant, vous attestez que les soins et montants correspondent à votre situation.</p>
+                    </div>
+
+                    <form id="patient-verify-form" method="post" action="" class="mt-8 space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label for="id_dispute_reason" class="block text-sm font-medium text-slate-700 mb-1">Motif de contestation (obligatoire si vous contestez)</label>
+                            <textarea id="id_dispute_reason" name="dispute_reason" rows="3" placeholder="Décrivez brièvement la raison de votre contestation..." class="block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 shadow-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm {% if dispute_reason_error %}border-red-500{% endif %}">{{ dispute_reason_value|default:'' }}</textarea>
+                            <p id="dispute-reason-error-msg" class="mt-1 text-sm text-red-600" role="alert" style="{% if not dispute_reason_error %}display:none{% endif %}">{% if dispute_reason_error %}{{ dispute_reason_error }}{% endif %}</p>
+                        </div>
+                        <button type="submit" name="action" value="confirm" class="w-full min-h-[52px] flex justify-center items-center gap-2 rounded-2xl py-4 px-5 text-base font-semibold text-white bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-lg shadow-emerald-500/25 hover:from-emerald-500 hover:to-emerald-400 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">
+                            <i class="bi bi-check-circle-fill text-xl"></i>
+                            <span>Je confirme — tout est correct</span>
+                        </button>
+                        <button type="submit" name="action" value="dispute" class="w-full min-h-[52px] flex justify-center items-center gap-2 rounded-2xl py-4 px-5 text-base font-semibold text-red-600 border-2 border-red-200 bg-white hover:bg-red-50 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                            <i class="bi bi-exclamation-triangle-fill text-xl"></i>
+                            <span>Je conteste — quelque chose ne va pas</span>
+                        </button>
+                    </form>
+                </div>
+
+                <p class="px-5 sm:px-8 pb-6 sm:pb-8 text-center text-xs text-slate-400 leading-relaxed">
+                    En confirmant, vous certifiez l’exactitude des informations. Toute fausse déclaration peut entraîner des sanctions.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% if not invalid and not done %}
+<script>
+(function() {
+    var form = document.getElementById('patient-verify-form');
+    var textarea = document.getElementById('id_dispute_reason');
+    var errorEl = document.getElementById('dispute-reason-error-msg');
+    if (!form || !textarea) return;
+    form.addEventListener('submit', function(e) {
+        var submitter = e.submitter;
+        if (submitter && submitter.name === 'action' && submitter.value === 'dispute') {
+            if (!textarea.value || !textarea.value.trim()) {
+                e.preventDefault();
+                if (errorEl) {
+                    errorEl.textContent = 'Veuillez indiquer la raison de votre contestation.';
+                    errorEl.style.display = 'block';
+                }
+                textarea.focus();
+                textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (textarea.classList && !textarea.classList.contains('border-red-500')) textarea.classList.add('border-red-500');
+                return false;
+            }
+        }
+    });
+    if (errorEl && errorEl.textContent.trim()) {
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        textarea.focus();
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

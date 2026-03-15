@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Dossiers - REMEDY{% endblock %}
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Gestion des Dossiers</h2>
+        <p class="mt-1 text-sm text-slate-500">Liste complète des demandes — recherchez, triez, filtrez</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a href="{% url 'claim_create' %}" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:from-brand-500 hover:to-brand-600 transition-all">
+            <i class="bi bi-plus-circle"></i> Nouvelle demande
+        </a>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl mb-6 overflow-visible">
+    <div class="px-4 py-5 sm:p-6">
+        <form method="get" class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="w-full sm:flex-1">
+                <label for="search" class="block text-sm font-medium text-slate-700 mb-2">Recherche patient</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="bi bi-search text-lg"></i>
+                    </div>
+                    <input type="text" name="q" id="search" value="{{ query }}" class="block w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-4 text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm caret-slate-900" placeholder="Nom du patient...">
+                </div>
+            </div>
+            <div class="w-full sm:w-64">
+                <label for="status" class="block text-sm font-medium text-slate-700 mb-2">Statut</label>
+                <select id="status" name="status" class="block w-full">
+                    <option value="">Tous les statuts</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 transition-all h-[42px]">
+                    <i class="bi bi-funnel"></i> Filtrer
+                </button>
+                <a href="{% url 'claim_list' %}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-all h-[42px]">
+                    <i class="bi bi-x-circle"></i> Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Table Tabulator -->
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden tabulator-modern-wrap">
+    <div id="claims-table" class="w-full"></div>
+</div>
+
+{{ claims_data|json_script:"claims-data" }}
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const el = document.getElementById('claims-data');
+    const claimsData = el ? JSON.parse(el.textContent || '[]') : [];
+    const statusStyles = {
+        'BLOCKED': 'background:#fef2f2;color:#b91c1c',
+        'SUBMITTED': 'background:#eff6ff;color:#1d4ed8',
+        'LOCKED': 'background:#fff7ed;color:#c2410c',
+        'READY_FOR_PAYMENT': 'background:#f0fdf4;color:#15803d',
+        'DRAFT': 'background:#fffbeb;color:#b45309',
+        'PATIENT_CONFIRMED': 'background:#ecfdf5;color:#047857',
+        'DISPUTED': 'background:#fef2f2;color:#b91c1c'
+    };
+    new Tabulator('#claims-table', {
+        data: claimsData,
+        layout: 'fitDataStretch',
+        columnDefaults: { minWidth: 120 },
+        responsiveLayout: 'collapse',
+        pagination: true,
+        paginationSize: 25,
+        paginationSizeSelector: [10, 25, 50, 100],
+        placeholder: 'Aucun dossier trouvé.',
+        columns: [
+            { title: 'ID', field: 'id', sorter: 'number', width: 80, formatter: function(cell) { return '#' + cell.getValue(); } },
+            { title: 'Patient', field: 'patient', sorter: 'string',
+              formatter: function(cell) {
+                const row = cell.getRow().getData();
+                return '<div class="font-medium text-slate-900">' + (row.patient || '') + '</div><div class="text-slate-500 text-xs">' + (row.member_number || '') + '</div>';
+              } },
+            { title: 'Catégorie', field: 'category', sorter: 'string',
+              formatter: function(cell) {
+                const row = cell.getRow().getData();
+                return '<div class="text-slate-900">' + (row.category || '') + '</div><div class="text-slate-500 text-xs">' + (row.provider || '') + '</div>';
+              } },
+            { title: 'Montant', field: 'total_amount', sorter: 'number', hozAlign: 'right', width: 130,
+              formatter: function(cell) { return '<span class="tab-montant">' + cell.getValue() + ' FCFA</span>'; } },
+            { title: 'Statut', field: 'status_display', sorter: 'string',
+              formatter: function(cell) {
+                const row = cell.getRow().getData();
+                const st = statusStyles[row.status] || 'background:#f1f5f9;color:#64748b';
+                return '<span class="status-badge" style="' + st + '">' + (row.status_display || '') + '</span>';
+              } },
+            { title: 'Date', field: 'updated_at', sorter: 'string', width: 120 },
+            { title: 'Actions', width: 74, hozAlign: 'center', formatter: function(cell) {
+                const url = cell.getRow().getData().detail_url;
+                return '<a href="' + url + '" class="table-action-btn"><i class="bi bi-box-arrow-up-right"></i> Gérer</a>';
+            } }
+        ],
+        initialSort: [{ column: 'id', dir: 'desc' }],
+        langs: {
+            'fr-fr': {
+                pagination: {
+                    first: 'Début', first_title: 'Première page',
+                    last: 'Fin', last_title: 'Dernière page',
+                    prev: 'Précédent', prev_title: 'Page précédente',
+                    next: 'Suivant', next_title: 'Page suivante',
+                    all: 'Tout', page_size: 'Par page'
+                }
+            }
+        },
+        locale: 'fr-fr'
+    });
+});
+</script>
+{% endblock %}

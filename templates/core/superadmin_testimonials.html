@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Avis (témoignages) – Backoffice Remedi{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Avis / Témoignages</h2>
+        <p class="mt-1 text-sm text-slate-500">Les avis affichés sur la page d'accueil du site (section « Ils nous font confiance »).</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a href="{% url 'superadmin_dashboard' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour au dashboard
+        </a>
+    </div>
+</div>
+
+{% if messages %}
+<div class="mb-6 space-y-2">
+    {% for message in messages %}
+    <div class="rounded-xl px-4 py-3 text-sm font-medium {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Formulaire Ajout / Édition -->
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden mb-8">
+    <div class="px-5 py-4 sm:px-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-5 rounded-full bg-brand-500"></span>
+            {% if editing %}Modifier l'avis{% else %}Ajouter un avis{% endif %}
+        </h3>
+    </div>
+    <div class="p-6">
+        <form method="post" action="{% if editing %}{% url 'superadmin_testimonial_edit' editing.pk %}{% else %}{% url 'superadmin_testimonial_add' %}{% endif %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="id_author" class="block text-sm font-medium text-slate-700">Auteur</label>
+                    {{ form.author }}
+                    {% if form.author.errors %}<p class="mt-1 text-sm text-rose-600">{{ form.author.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label for="id_role_or_organisation" class="block text-sm font-medium text-slate-700">Fonction ou organisation</label>
+                    {{ form.role_or_organisation }}
+                    {% if form.role_or_organisation.errors %}<p class="mt-1 text-sm text-rose-600">{{ form.role_or_organisation.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+            <div class="mt-6">
+                <label for="id_quote" class="block text-sm font-medium text-slate-700">Citation / avis</label>
+                {{ form.quote }}
+                {% if form.quote.errors %}<p class="mt-1 text-sm text-rose-600">{{ form.quote.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="mt-6 flex flex-wrap items-center gap-6">
+                <div>
+                    <label for="id_order" class="block text-sm font-medium text-slate-700">Ordre d'affichage</label>
+                    {{ form.order }}
+                    {% if form.order.errors %}<p class="mt-1 text-sm text-rose-600">{{ form.order.errors.0 }}</p>{% endif %}
+                    <p class="mt-1 text-xs text-slate-500">Plus le nombre est petit, plus l'avis apparaît en premier.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    {{ form.is_active }}
+                    <label for="id_is_active" class="text-sm font-medium text-slate-700">Publié sur le site</label>
+                </div>
+            </div>
+            <div class="mt-6 flex gap-3">
+                <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500">
+                    {% if editing %}Enregistrer{% else %}Ajouter l'avis{% endif %}
+                </button>
+                {% if editing %}
+                <a href="{% url 'superadmin_testimonial_list' %}" class="inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">Annuler</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Liste des avis -->
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+    <div class="px-5 py-4 sm:px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50/80 to-white">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-5 rounded-full bg-brand-500"></span>
+            Avis enregistrés ({{ testimonials|length }})
+        </h3>
+    </div>
+    <div class="divide-y divide-slate-100">
+        {% for t in testimonials %}
+        <div class="px-5 py-4 sm:px-6 flex flex-wrap items-start justify-between gap-4 hover:bg-slate-50/50 transition-colors">
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-semibold text-slate-900">{{ t.author }}</span>
+                    <span class="text-slate-500">–</span>
+                    <span class="text-sm text-slate-600">{{ t.role_or_organisation }}</span>
+                    {% if t.is_active %}
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">Publié</span>
+                    {% else %}
+                    <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">Masqué</span>
+                    {% endif %}
+                </div>
+                <p class="mt-2 text-sm text-slate-600">"{{ t.quote|truncatewords:25 }}"</p>
+                <p class="mt-1 text-xs text-slate-400">Ordre : {{ t.order }}</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{% url 'superadmin_testimonial_edit' t.pk %}" class="inline-flex items-center gap-1.5 rounded-lg bg-brand-50 px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-100">
+                    <i class="bi bi-pencil"></i> Modifier
+                </a>
+                <form method="post" action="{% url 'superadmin_testimonial_delete' t.pk %}" onsubmit="return confirm('Supprimer cet avis ?');" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100">
+                        <i class="bi bi-trash"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div class="px-5 py-12 sm:px-6 text-center text-slate-500">
+            <i class="bi bi-chat-quote text-4xl text-slate-300 mb-2"></i>
+            <p>Aucun avis pour l'instant. Ajoutez-en un avec le formulaire ci-dessus.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

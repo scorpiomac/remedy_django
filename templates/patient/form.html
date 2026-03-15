@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - REMEDY{% endblock %}
+{% block content_form_errors %}
+{% if form.non_field_errors %}
+<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start gap-3">
+    <i class="bi bi-exclamation-circle-fill text-red-500 flex-shrink-0 mt-0.5"></i>
+    <ul class="list-none space-y-1">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:tracking-tight">{{ title }}</h2>
+        <p class="mt-1 text-sm text-slate-500">Fiche patient / bénéficiaire</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+        <a href="{% url 'patient_list' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto space-y-8">
+    <form method="post" class="form-section space-y-8" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Adhésion / IPM (masqué pour les IPM Admin : patient toujours rattaché à leur IPM) -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Adhésion et couverture</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {% if show_ipm_field or not forced_ipm %}
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">IPM</label>
+                    <div class="flex flex-wrap items-start gap-2">
+                        <div class="min-w-[200px]">{{ form.ipm }}</div>
+                        {% include "includes/ipm_select_with_create.html" with select_id="id_ipm" %}
+                    </div>
+                    {% if form.ipm.errors %}<p class="text-sm text-red-600 mt-1">{{ form.ipm.errors.0 }}</p>{% endif %}
+                </div>
+                {% else %}
+                {{ form.ipm }}
+                {% endif %}
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Formule de couverture</label>
+                    {{ form.coverage_plan }}
+                    {% if form.coverage_plan.errors %}<p class="text-sm text-red-600 mt-1">{{ form.coverage_plan.errors.0 }}</p>{% endif %}
+                    <p class="text-xs text-slate-500 mt-1">Plan de couverture (optionnel).</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Type de bénéficiaire</label>
+                    {{ form.beneficiary_type }}
+                    {% if form.beneficiary_type.errors %}<p class="text-sm text-red-600 mt-1">{{ form.beneficiary_type.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">N° membre / matricule</label>
+                    {{ form.member_number }}
+                    {% if form.member_number.errors %}<p class="text-sm text-red-600 mt-1">{{ form.member_number.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Identité -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Identité</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Nom complet</label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}<p class="text-sm text-red-600 mt-1">{{ form.full_name.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Date de naissance</label>
+                    {{ form.date_of_birth }}
+                    {% if form.date_of_birth.errors %}<p class="text-sm text-red-600 mt-1">{{ form.date_of_birth.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Genre</label>
+                    {{ form.gender }}
+                    {% if form.gender.errors %}<p class="text-sm text-red-600 mt-1">{{ form.gender.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">N° CNI / pièce d'identité</label>
+                    {{ form.id_number }}
+                    {% if form.id_number.errors %}<p class="text-sm text-red-600 mt-1">{{ form.id_number.errors.0 }}</p>{% endif %}
+                    <p class="text-xs text-slate-500 mt-1">Facilite la recherche chez les providers (optionnel).</p>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Photo / scan pièce d'identité (KYC)</label>
+                    {{ form.id_document }}
+                    {% if form.id_document.errors %}<p class="text-sm text-red-600 mt-1">{{ form.id_document.errors.0 }}</p>{% endif %}
+                    {% if patient and patient.id_document %}
+                    <p class="text-xs text-slate-600 mt-2">
+                        <a href="{{ patient.id_document.url }}" target="_blank" rel="noopener" class="text-brand-600 hover:underline">Voir le document actuel</a>
+                        — En choisir un nouveau le remplace.
+                    </p>
+                    {% else %}
+                    <p class="text-xs text-slate-500 mt-1">Recto ou recto-verso CNI / passeport. Image ou PDF (optionnel).</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Contact</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Téléphone</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<p class="text-sm text-red-600 mt-1">{{ form.phone.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<p class="text-sm text-red-600 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Adresse -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Adresse</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Adresse</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}<p class="text-sm text-red-600 mt-1">{{ form.address.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Ville</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<p class="text-sm text-red-600 mt-1">{{ form.city.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Remarques -->
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Remarques</h3>
+            <div>
+                {{ form.notes }}
+                {% if form.notes.errors %}<p class="text-sm text-red-600 mt-1">{{ form.notes.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-brand-500">
+                <i class="bi bi-check2-circle"></i> Enregistrer
+            </button>
+            <a href="{% url 'patient_list' %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

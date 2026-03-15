@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouvelle demande de démo</title>
+</head>
+<body style="margin:0; padding:0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f1f5f9;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9;">
+    <tr>
+      <td align="center" style="padding: 32px 16px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 560px; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(14, 59, 100, 0.08); overflow: hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0E3B64 0%, #1a4d7a 100%); padding: 28px 32px; text-align: center;">
+              <span style="font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">Remedi</span>
+              <p style="margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,0.85);">Plateforme réclamations santé</p>
+            </td>
+          </tr>
+          <!-- Badge -->
+          <tr>
+            <td style="padding: 20px 32px 0;">
+              <table role="presentation" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="background-color: #e0f7f7; color: #0E3B64; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 14px; border-radius: 999px;">Nouvelle demande de démo</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding: 24px 32px 32px;">
+              <p style="margin: 0 0 20px; font-size: 16px; color: #334155; line-height: 1.5;">Une nouvelle demande a été enregistrée depuis la landing.</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+                <tr>
+                  <td style="padding: 16px 20px; background-color: #f8fafc; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Contact</td>
+                </tr>
+                <tr><td style="padding: 12px 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #334155;"><strong>Prénom / Nom :</strong> {{ demo_request.first_name }} {{ demo_request.last_name }}</td></tr>
+                <tr><td style="padding: 12px 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #334155;"><strong>Email :</strong> <a href="mailto:{{ demo_request.email }}" style="color: #26B5B9; text-decoration: none;">{{ demo_request.email }}</a></td></tr>
+                <tr><td style="padding: 12px 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #334155;"><strong>Téléphone :</strong> {{ demo_request.phone|default:"—" }}</td></tr>
+                <tr>
+                  <td style="padding: 16px 20px; background-color: #f8fafc; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; border-top: 1px solid #e2e8f0;">Organisation</td>
+                </tr>
+                <tr><td style="padding: 12px 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #334155;"><strong>Structure :</strong> {{ demo_request.organisation }}</td></tr>
+                <tr><td style="padding: 12px 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #334155;"><strong>Profil :</strong> {{ demo_request.get_profile_display }}</td></tr>
+                <tr>
+                  <td style="padding: 16px 20px; background-color: #f8fafc; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; border-top: 1px solid #e2e8f0;">Message</td>
+                </tr>
+                <tr><td style="padding: 16px 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #334155; line-height: 1.6;">{{ demo_request.message|default:"—" }}</td></tr>
+              </table>
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin-top: 24px;">
+                <tr>
+                  <td style="background-color: #0E3B64; border-radius: 10px;">
+                    <a href="{{ admin_url }}" style="display: inline-block; padding: 14px 24px; font-size: 14px; font-weight: 600; color: #ffffff; text-decoration: none;">Voir dans l'admin</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 16px 32px; background-color: #f8fafc; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0;">Remedi – {{ site_name }}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

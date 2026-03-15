@@ -1,0 +1,193 @@
+:root {
+    --remedi-primary: #0b4a7c;
+    --remedi-accent: #33c3cc;
+    --remedi-bg: #f4f8fb;
+    --remedi-text: #15243a;
+    --remedi-muted: #67809f;
+    --remedi-card-shadow: 0 10px 30px rgba(15, 51, 89, 0.08);
+}
+
+html,
+body {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: var(--remedi-text);
+    background: radial-gradient(1200px 450px at 80% -10%, rgba(51, 195, 204, 0.12), transparent),
+        radial-gradient(900px 350px at -10% -5%, rgba(11, 74, 124, 0.12), transparent),
+        var(--remedi-bg);
+}
+
+.remedi-navbar {
+    background: rgba(8, 32, 58, 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 18px rgba(6, 23, 44, 0.28);
+}
+
+.remedi-logo {
+    height: 34px;
+    width: auto;
+}
+
+.brand-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.brand-label {
+    color: #ecf6ff;
+}
+
+.page-shell {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.surface-card {
+    border: 0;
+    border-radius: 16px;
+    box-shadow: var(--remedi-card-shadow);
+    background: #ffffff;
+}
+
+.surface-card .card-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e9f0f6;
+}
+
+.kpi-card {
+    border-radius: 14px;
+    border: 1px solid #e7eef6;
+    background: linear-gradient(160deg, #ffffff, #f9fcff);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(17, 72, 115, 0.12);
+}
+
+.kpi-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--remedi-muted);
+}
+
+.kpi-value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--remedi-primary);
+}
+
+.btn-remedi {
+    background: linear-gradient(120deg, var(--remedi-primary), #0f5f9d);
+    color: #fff;
+    border: 0;
+    box-shadow: 0 8px 20px rgba(11, 74, 124, 0.22);
+}
+
+.btn-remedi:hover,
+.btn-remedi:focus {
+    color: #fff;
+    background: linear-gradient(120deg, #0a4372, #0d548d);
+}
+
+.btn-remedi-soft {
+    color: var(--remedi-primary);
+    border: 1px solid #cce2f3;
+    background: #f5fbff;
+}
+
+.btn-remedi-soft:hover {
+    color: #08385f;
+    border-color: #b7d8ef;
+    background: #e9f6ff;
+}
+
+.table-modern thead th {
+    color: #5c7898;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #e9f0f6;
+    font-weight: 600;
+}
+
+.table-modern tbody tr {
+    border-bottom: 1px solid #eff4f9;
+}
+
+.table-modern tbody tr:last-child {
+    border-bottom: 0;
+}
+
+.badge-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.status-blocked {
+    background: #fee9ec;
+    color: #b42336;
+}
+
+.status-submitted {
+    background: #ecf4ff;
+    color: #225ea8;
+}
+
+.status-default {
+    background: #eef5fc;
+    color: #375878;
+}
+
+.hero-card {
+    overflow: hidden;
+    position: relative;
+}
+
+.hero-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -80px -80px auto;
+    width: 220px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(51, 195, 204, 0.25), transparent 65%);
+}
+
+.login-shell {
+    min-height: calc(100vh - 96px);
+}
+
+.login-card {
+    border: 0;
+    border-radius: 18px;
+    box-shadow: 0 18px 45px rgba(13, 54, 90, 0.16);
+}
+
+.subtle-text {
+    color: var(--remedi-muted);
+}
+
+pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: #f7fbff;
+    border: 1px solid #e4edf5;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.82rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #88bfdc;
+    box-shadow: 0 0 0 0.2rem rgba(31, 122, 184, 0.18);
+}

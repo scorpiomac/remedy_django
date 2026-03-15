@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Qui reçoit les mails de demande de démo – Backoffice Remedi{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Qui reçoit les mails de demande de démo ?</h2>
+        <p class="mt-1 text-sm text-slate-500">Configurez les destinataires des notifications et l'envoi d'une copie au client.</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a href="{% url 'superadmin_dashboard' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour au dashboard
+        </a>
+    </div>
+</div>
+
+{% if messages %}
+<div class="mb-6 space-y-2">
+    {% for message in messages %}
+    <div class="rounded-xl px-4 py-3 text-sm font-medium {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden max-w-2xl">
+    <div class="px-5 py-4 sm:px-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/80 to-white">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-5 rounded-full bg-brand-500"></span>
+            Configuration des notifications
+        </h3>
+    </div>
+    <form method="post" class="p-6">
+        {% csrf_token %}
+        <div>
+            <label for="id_notification_emails" class="block text-sm font-medium text-slate-700">{{ form.notification_emails.label }}</label>
+            {% if form.notification_emails.help_text %}
+            <p class="mt-0.5 text-xs text-slate-500">{{ form.notification_emails.help_text }}</p>
+            {% endif %}
+            {{ form.notification_emails }}
+            {% if form.notification_emails.errors %}<p class="mt-1 text-sm text-rose-600">{{ form.notification_emails.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="mt-6 flex items-start gap-3">
+            {{ form.send_copy_to_client }}
+            <div>
+                <label for="id_send_copy_to_client" class="text-sm font-medium text-slate-700">{{ form.send_copy_to_client.label }}</label>
+                {% if form.send_copy_to_client.help_text %}
+                <p class="text-xs text-slate-500">{{ form.send_copy_to_client.help_text }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% if form.send_copy_to_client.errors %}<p class="mt-1 text-sm text-rose-600">{{ form.send_copy_to_client.errors.0 }}</p>{% endif %}
+        <div class="mt-8 flex items-center gap-4">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500">
+                Enregistrer
+            </button>
+            {% if config.updated_at %}
+            <span class="text-xs text-slate-400">Dernière modification : {{ config.updated_at|date:"d/m/Y H:i" }}</span>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<div class="mt-6 rounded-xl bg-slate-50 border border-slate-200 p-4 max-w-2xl">
+    <p class="text-sm text-slate-600">
+        <strong>Rappel :</strong> si aucune adresse n'est renseignée ci-dessus, les adresses définies dans la variable d'environnement <code class="bg-white px-1.5 py-0.5 rounded text-xs">REMEDY_DEMO_NOTIFICATION_EMAILS</code> seront utilisées.
+    </p>
+</div>
+{% endblock %}

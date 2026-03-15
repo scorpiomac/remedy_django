@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Superadmin - REMEDY{% endblock %}
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/dist/css/tabulator.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Pilotage Exécutif</h2>
+        <p class="mt-1 text-sm text-slate-500">Vue globale de l'activité REMEDY</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0 flex-wrap gap-2">
+        <a href="{% url 'claim_list' %}" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">
+            <i class="bi bi-list-ul"></i> Tous les dossiers
+        </a>
+    </div>
+</div>
+
+<!-- KPIs -->
+<dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+    <div class="relative overflow-hidden rounded-2xl bg-white px-5 pt-5 pb-6 shadow-card ring-1 ring-slate-900/5 transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover group">
+        <dt class="flex items-center justify-between">
+            <p class="text-sm font-medium text-slate-500">IPMs Actives</p>
+            <div class="rounded-xl bg-brand-500/10 p-2.5 group-hover:bg-brand-500/20 transition-colors">
+                <i class="bi bi-building text-xl text-brand-600"></i>
+            </div>
+        </dt>
+        <dd class="mt-3"><p class="text-2xl font-bold text-slate-900">{{ total_ipms }}</p></dd>
+    </div>
+    <div class="relative overflow-hidden rounded-2xl bg-white px-5 pt-5 pb-6 shadow-card ring-1 ring-slate-900/5 transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover group">
+        <dt class="flex items-center justify-between">
+            <p class="text-sm font-medium text-slate-500">Patients</p>
+            <div class="rounded-xl bg-emerald-500/10 p-2.5 group-hover:bg-emerald-500/20 transition-colors">
+                <i class="bi bi-people text-xl text-emerald-600"></i>
+            </div>
+        </dt>
+        <dd class="mt-3"><p class="text-2xl font-bold text-slate-900">{{ total_patients }}</p></dd>
+    </div>
+    <div class="relative overflow-hidden rounded-2xl bg-white px-5 pt-5 pb-6 shadow-card ring-1 ring-slate-900/5 transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover group">
+        <dt class="flex items-center justify-between">
+            <p class="text-sm font-medium text-slate-500">Claims Totales</p>
+            <div class="rounded-xl bg-amber-500/10 p-2.5 group-hover:bg-amber-500/20 transition-colors">
+                <i class="bi bi-file-earmark-medical text-xl text-amber-600"></i>
+            </div>
+        </dt>
+        <dd class="mt-3"><p class="text-2xl font-bold text-slate-900">{{ total_claims }}</p></dd>
+    </div>
+</dl>
+
+<!-- Table Tabulator -->
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden tabulator-modern-wrap">
+    <div class="px-5 py-5 sm:px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50/80 to-white">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-5 rounded-full bg-brand-500"></span>
+            Derniers dossiers
+        </h3>
+        <a href="{% url 'claim_list' %}" class="text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors flex items-center gap-1">
+            Tout voir <i class="bi bi-arrow-right text-xs"></i>
+        </a>
+    </div>
+    <div id="superadmin-claims-table" class="w-full"></div>
+</div>
+
+{{ claims_data|json_script:"superadmin-claims-data" }}
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const el = document.getElementById('superadmin-claims-data');
+    const data = el ? JSON.parse(el.textContent || '[]') : [];
+    const statusStyles = {'BLOCKED':'background:#fef2f2;color:#b91c1c','SUBMITTED':'background:#eff6ff;color:#1d4ed8','LOCKED':'background:#fff7ed;color:#c2410c','READY_FOR_PAYMENT':'background:#f0fdf4;color:#15803d','DRAFT':'background:#fffbeb;color:#b45309','PATIENT_CONFIRMED':'background:#ecfdf5;color:#047857','DISPUTED':'background:#fef2f2;color:#b91c1c'};
+    new Tabulator('#superadmin-claims-table', {
+        data: data,
+        layout: 'fitDataStretch',
+        columnDefaults: { minWidth: 120 },
+        responsiveLayout: 'collapse',
+        pagination: true,
+        paginationSize: 10,
+        paginationSizeSelector: [10, 25],
+        placeholder: 'Aucun dossier.',
+        columns: [
+            { title: 'ID', field: 'id', sorter: 'number', width: 70, formatter: c => '#' + c.getValue() },
+            { title: 'Patient', field: 'patient', sorter: 'string',
+              formatter: function(c) { const r=c.getRow().getData(); return '<div class="font-medium">'+r.patient+'</div><div class="text-xs text-slate-500">'+r.ipm+'</div>'; } },
+            { title: 'Prestataire', field: 'provider', sorter: 'string' },
+            { title: 'Montant', field: 'total_amount', sorter: 'number', hozAlign: 'right', width: 140,
+              formatter: function(c) { return '<span class="tab-montant">' + c.getValue() + ' <span style="color:#64748b;font-size:0.75rem">FCFA</span></span>'; } },
+            { title: 'Statut', field: 'status_display', sorter: 'string',
+              formatter: function(c) { const s=c.getRow().getData().status; const st=statusStyles[s]||'background:#f1f5f9;color:#64748b'; return '<span class="status-badge" style="'+st+'">'+c.getValue()+'</span>'; } },
+            { title: 'Date', field: 'created_at', sorter: 'string', width: 120 },
+            { title: 'Action', width: 74, formatter: function(c) { const u=c.getRow().getData().detail_url; return '<a href="'+u+'" class="table-action-btn"><i class="bi bi-box-arrow-up-right"></i> Ouvrir</a>'; } }
+        ],
+        initialSort: [{ column: 'id', dir: 'desc' }],
+        langs: {'fr-fr':{pagination:{first:'Début',last:'Fin',prev:'Précédent',next:'Suivant',all:'Tout',page_size:'Par page'}}},
+        locale: 'fr-fr'
+    });
+});
+</script>
+{% endblock %}

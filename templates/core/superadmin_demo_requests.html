@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Demandes de démo – Backoffice Remedi{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Demandes de démo</h2>
+        <p class="mt-1 text-sm text-slate-500">Consultez et traitez les demandes envoyées depuis la page d'accueil.</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0 flex-wrap gap-2">
+        <a href="{% url 'superadmin_dashboard' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour au dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Filtre par statut -->
+<div class="mb-6 flex flex-wrap items-center gap-2">
+    <span class="text-sm font-medium text-slate-600">Statut :</span>
+    <a href="{% url 'superadmin_demo_request_list' %}" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if not status_filter %}bg-brand-100 text-brand-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Toutes</a>
+    <a href="{% url 'superadmin_demo_request_list' %}?status=new" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if status_filter == 'new' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Nouvelles</a>
+    <a href="{% url 'superadmin_demo_request_list' %}?status=contacted" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if status_filter == 'contacted' %}bg-blue-100 text-blue-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Contactées</a>
+    <a href="{% url 'superadmin_demo_request_list' %}?status=done" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if status_filter == 'done' %}bg-emerald-100 text-emerald-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Traitées</a>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+    <div class="px-5 py-4 sm:px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50/80 to-white">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-5 rounded-full bg-brand-500"></span>
+            {{ demo_requests|length }} demande(s)
+        </h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Contact</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Organisation</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Profil</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Statut</th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for dr in demo_requests %}
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-5 py-3 text-sm text-slate-600 whitespace-nowrap">{{ dr.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="px-5 py-3">
+                        <div class="font-medium text-slate-900">{{ dr.first_name }} {{ dr.last_name }}</div>
+                        <div class="text-sm text-slate-500"><a href="mailto:{{ dr.email }}" class="text-brand-600 hover:underline">{{ dr.email }}</a></div>
+                        {% if dr.phone %}<div class="text-xs text-slate-400">{{ dr.phone }}</div>{% endif %}
+                    </td>
+                    <td class="px-5 py-3 text-sm text-slate-700">{{ dr.organisation }}</td>
+                    <td class="px-5 py-3 text-sm text-slate-600">{{ dr.get_profile_display }}</td>
+                    <td class="px-5 py-3">
+                        {% if dr.status == 'new' %}<span class="inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">Nouvelle</span>
+                        {% elif dr.status == 'contacted' %}<span class="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">Contactée</span>
+                        {% else %}<span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Traitée</span>{% endif %}
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                        <a href="{% url 'superadmin_demo_request_detail' dr.pk %}" class="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-100">
+                            <i class="bi bi-eye"></i> Voir / Traiter
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-5 py-12 text-center text-slate-500">
+                        <i class="bi bi-inbox text-4xl text-slate-300 mb-2"></i>
+                        <p>Aucune demande de démo.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

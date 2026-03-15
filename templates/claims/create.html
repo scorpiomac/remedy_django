@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+{% block title %}Nouveau Dossier - REMEDY{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Nouveau Dossier</h2>
+        <p class="mt-1 text-sm text-slate-500">Demande de prise en charge — Formulaire complet</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a href="{% url 'claim_list' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50 transition-all">
+            <i class="bi bi-arrow-left"></i> Annuler
+        </a>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto space-y-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- 1. Patient et Catégorie -->
+        <div class="form-section">
+            <h3 class="flex items-center gap-2"><i class="bi bi-person-circle text-brand-600"></i> 1. Patient et Catégorie</h3>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Patient</label>
+                    {{ form.patient }}
+                    <div id="patient-summary" class="mt-2 hidden rounded-lg bg-slate-50 border border-slate-200 p-3 text-sm">
+                        <div class="flex items-center gap-2 text-slate-600">
+                            <i class="bi bi-card-text"></i>
+                            <span>N° Membre: <strong id="patient-member"></strong></span>
+                        </div>
+                        <div class="flex items-center gap-2 text-slate-600 mt-1">
+                            <i class="bi bi-building"></i>
+                            <span>IPM: <strong id="patient-ipm"></strong></span>
+                        </div>
+                        <div id="patient-formule-row" class="flex items-center gap-2 text-brand-700 mt-1 hidden">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Formule: <strong id="patient-formule"></strong></span>
+                        </div>
+                    </div>
+                    <p class="mt-1.5 text-sm text-slate-500">Sélectionnez l'assuré principal.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Catégorie de soins</label>
+                    {{ form.category }}
+                </div>
+                <div id="coverage-indicator" class="sm:col-span-2 hidden rounded-lg bg-brand-50 border border-brand-200 p-3 text-sm">
+                    <span class="text-brand-700"><i class="bi bi-percent"></i> Prise en charge estimée: <strong id="coverage-value">—</strong>%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Date et Référence -->
+        <div class="form-section">
+            <h3 class="flex items-center gap-2"><i class="bi bi-calendar3 text-brand-600"></i> 2. Date et Référence</h3>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Date des soins <span class="text-red-500">*</span></label>
+                    {{ form.care_date }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">N° facture / Référence</label>
+                    {{ form.invoice_number }}
+                    <p class="mt-1.5 text-sm text-slate-500">Traçabilité et anti-doublon.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Montant et Détails -->
+        <div class="form-section">
+            <h3 class="flex items-center gap-2"><i class="bi bi-tags text-brand-600"></i> 3. Montant et Détails</h3>
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div class="sm:min-w-[220px]">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Montant Total (FCFA) <span class="text-red-500">*</span></label>
+                    <div class="flex rounded-xl overflow-hidden border border-slate-300 shadow-sm focus-within:ring-1 focus-within:ring-brand-500 focus-within:border-brand-500">
+                        <span class="inline-flex items-center px-4 text-slate-500 bg-slate-50 border-r border-slate-200 text-sm font-medium shrink-0">FCFA</span>
+                        {{ form.total_amount }}
+                    </div>
+                    <p class="mt-1.5 text-sm text-slate-500">Ce montant sera <strong>immuable</strong> après soumission.</p>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Détails Médicaments / Actes</label>
+                    {{ form.medicine_names }}
+                    <p class="mt-1.5 text-sm text-slate-500"><strong>Obligatoire</strong> pour les catégories pharmacie. Optionnel pour les autres.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Documents (obligatoires pour soumettre) -->
+        <div id="documents-section" class="form-section">
+            <h3 class="flex items-center gap-2"><i class="bi bi-cloud-upload text-brand-600"></i> 4. Documents justificatifs</h3>
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <p class="text-sm text-slate-600">Chaque document peut être d'un type différent.</p>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Au moins un document requis pour soumettre
+                </span>
+            </div>
+            <div id="documents-container" class="space-y-4">
+                <div class="doc-row flex flex-wrap items-end gap-4 p-4 rounded-xl bg-slate-50/50 border border-slate-200">
+                    <div class="flex-1 min-w-[180px]">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Type</label>
+                        <select name="document_type_0" class="block w-full">
+                            {% for value, label in document_type_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">Fichier</label>
+                        <input type="file" name="document_file_0" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                    </div>
+                    <button type="button" class="doc-remove hidden p-2 text-red-500 hover:bg-red-50 rounded-lg" title="Supprimer">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="button" id="add-document" class="mt-4 inline-flex items-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-colors">
+                <i class="bi bi-plus-circle"></i> Ajouter un document
+            </button>
+        </div>
+
+        {% if form.errors %}
+        <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-800">
+            {% for field, errors in form.errors.items %}
+                {% for err in errors %}<p>{{ err }}</p>{% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div id="submit-no-docs-alert" class="hidden rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800 flex items-start gap-3">
+            <i class="bi bi-exclamation-circle-fill text-amber-500 text-lg shrink-0 mt-0.5"></i>
+            <div>
+                <p class="font-semibold">Document(s) requis</p>
+                <p>Vous devez joindre au moins un document pour soumettre directement. Utilisez le bouton <strong>Brouillon</strong> pour enregistrer sans document, puis ajoutez des pièces depuis la fiche détail.</p>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-4 pt-4 border-t border-slate-200">
+            <button type="button" onclick="this.closest('form').reset(); document.getElementById('patient-summary').classList.add('hidden'); document.getElementById('coverage-indicator').classList.add('hidden'); checkFilesForSubmit();" class="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">Réinitialiser</button>
+            <button type="submit" name="action" value="draft" class="inline-flex items-center gap-2 rounded-xl bg-slate-100 text-slate-700 px-4 py-2.5 text-sm font-semibold hover:bg-slate-200 transition-all focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2">
+                <i class="bi bi-file-earmark"></i> Brouillon
+            </button>
+            <button type="submit" name="action" value="create_and_submit" id="btn-create-submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:from-brand-500 hover:to-brand-600 transition-all focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:from-brand-600 disabled:hover:to-brand-500" title="Ajoutez au moins un document pour soumettre">
+                <i class="bi bi-send-check"></i> Créer et soumettre
+            </button>
+        </div>
+    </form>
+</div>
+
+{{ patients_summary|json_script:"patients-summary" }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const el = document.getElementById('patients-summary');
+    const patientsSummary = el ? JSON.parse(el.textContent || '{}') : {};
+    const patientSelect = document.querySelector('select[name="patient"]');
+    const categorySelect = document.querySelector('select[name="category"]');
+    const patientSummaryEl = document.getElementById('patient-summary');
+    const coverageIndicator = document.getElementById('coverage-indicator');
+    const coverageValue = document.getElementById('coverage-value');
+
+    function showPatientSummary(patientId) {
+        const s = patientsSummary[patientId];
+        if (!s) {
+            patientSummaryEl.classList.add('hidden');
+            return;
+        }
+        document.getElementById('patient-member').textContent = s.member_number;
+        document.getElementById('patient-ipm').textContent = s.ipm_name;
+        const formuleRow = document.getElementById('patient-formule-row');
+        const formuleEl = document.getElementById('patient-formule');
+        if (s.formule) {
+            formuleEl.textContent = s.formule;
+            formuleRow.classList.remove('hidden');
+        } else {
+            formuleRow.classList.add('hidden');
+        }
+        patientSummaryEl.classList.remove('hidden');
+    }
+
+    function fetchCoverage() {
+        const pid = patientSelect?.value;
+        const cid = categorySelect?.value;
+        if (!pid || !cid) {
+            coverageIndicator.classList.add('hidden');
+            return;
+        }
+        fetch('{% url "api_coverage" %}?patient_id=' + pid + '&category_id=' + cid)
+            .then(r => r.json())
+            .then(data => {
+                if (data.coverage_percent != null) {
+                    coverageValue.textContent = data.coverage_percent;
+                    coverageIndicator.classList.remove('hidden');
+                } else {
+                    coverageIndicator.classList.add('hidden');
+                }
+            })
+            .catch(() => coverageIndicator.classList.add('hidden'));
+    }
+
+    function onPatientOrCategoryChange() {
+        showPatientSummary(patientSelect?.value || '');
+        fetchCoverage();
+    }
+
+    if (patientSelect) {
+        patientSelect.addEventListener('change', onPatientOrCategoryChange);
+        onPatientOrCategoryChange();
+    }
+    if (categorySelect) {
+        categorySelect.addEventListener('change', fetchCoverage);
+    }
+
+    setTimeout(onPatientOrCategoryChange, 200);
+
+    // Documents: type + fichier par ligne, ajout dynamique
+    const docContainer = document.getElementById('documents-container');
+    const addBtn = document.getElementById('add-document');
+    const docRowTemplate = docContainer.querySelector('.doc-row').cloneNode(true);
+    let docIndex = 1;
+
+    function getNextDocRow() {
+        const row = docRowTemplate.cloneNode(true);
+        const typeSelect = row.querySelector('select');
+        const fileInput = row.querySelector('input[type="file"]');
+        const removeBtn = row.querySelector('.doc-remove');
+        typeSelect.name = 'document_type_' + docIndex;
+        typeSelect.value = typeSelect.options[0].value;
+        fileInput.name = 'document_file_' + docIndex;
+        fileInput.value = '';
+        removeBtn.classList.remove('hidden');
+        removeBtn.onclick = function() { row.remove(); };
+        docIndex++;
+        return row;
+    }
+
+    function updateRemoveButtons() {
+        const rows = docContainer.querySelectorAll('.doc-row');
+        rows.forEach((row) => {
+            const btn = row.querySelector('.doc-remove');
+            btn.style.display = rows.length > 1 ? '' : 'none';
+            btn.onclick = function() {
+                row.remove();
+                updateRemoveButtons();
+                checkFilesForSubmit();
+            };
+        });
+    }
+
+    // Validation "Créer et soumettre" : au moins un fichier requis
+    function hasAtLeastOneFile() {
+        const inputs = docContainer.querySelectorAll('input[type="file"]');
+        for (const inp of inputs) {
+            if (inp.files && inp.files.length > 0) return true;
+        }
+        return false;
+    }
+
+    function checkFilesForSubmit() {
+        const btn = document.getElementById('btn-create-submit');
+        const alertEl = document.getElementById('submit-no-docs-alert');
+        const docsSection = document.getElementById('documents-section');
+        const hasFiles = hasAtLeastOneFile();
+        btn.disabled = !hasFiles;
+        alertEl.classList.add('hidden');
+        docsSection.classList.remove('ring-2', 'ring-amber-400');
+    }
+
+    docContainer.addEventListener('change', function(e) {
+        if (e.target.matches('input[type="file"]')) checkFilesForSubmit();
+    });
+
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const btn = e.submitter;
+        if (btn && btn.name === 'action' && btn.value === 'create_and_submit' && !hasAtLeastOneFile()) {
+            e.preventDefault();
+            document.getElementById('submit-no-docs-alert').classList.remove('hidden');
+            const docsSection = document.getElementById('documents-section');
+            docsSection.classList.add('ring-2', 'ring-amber-400');
+            docsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    addBtn.addEventListener('click', function() {
+        docContainer.appendChild(getNextDocRow());
+        updateRemoveButtons();
+        checkFilesForSubmit();
+    });
+    updateRemoveButtons();
+    checkFilesForSubmit();
+});
+</script>
+{% endblock %}

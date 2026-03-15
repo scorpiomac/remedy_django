@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votre demande de démo Remedi</title>
+</head>
+<body style="margin:0; padding:0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f1f5f9;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f1f5f9;">
+    <tr>
+      <td align="center" style="padding: 32px 16px;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 24px rgba(14, 59, 100, 0.08); overflow: hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0E3B64 0%, #1a4d7a 100%); padding: 32px; text-align: center;">
+              <span style="font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em;">Remedi</span>
+              <p style="margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,0.85);">Réclamations santé : centralisez. Accélérez.</p>
+            </td>
+          </tr>
+          <!-- Content -->
+          <tr>
+            <td style="padding: 32px;">
+              <p style="margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #0E3B64;">Bonjour {{ demo_request.first_name }},</p>
+              <p style="margin: 0 0 20px; font-size: 16px; color: #334155; line-height: 1.6;">Nous avons bien reçu votre demande de démo pour <strong>{{ demo_request.organisation }}</strong>.</p>
+              <p style="margin: 0 0 24px; font-size: 15px; color: #475569; line-height: 1.6;">Notre équipe vous recontactera très prochainement pour convenir d’un rendez-vous et vous présenter la plateforme.</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <p style="margin: 0; font-size: 14px; color: #0f766e; line-height: 1.5;">&#10004; Demande enregistrée</p>
+                    <p style="margin: 6px 0 0; font-size: 14px; color: #0f766e; line-height: 1.5;">&#10004; Réponse sous 48 h ouvrées</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin: 24px 0 0; font-size: 14px; color: #64748b;">Une question ? Répondez simplement à cet email ou contactez-nous à <a href="mailto:contact@remediafrica.com" style="color: #26B5B9; text-decoration: none;">contact@remediafrica.com</a>.</p>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 32px; background-color: #f8fafc; font-size: 12px; color: #64748b; text-align: center; border-top: 1px solid #e2e8f0;">
+              Remedi – {{ site_name }}<br>
+              <a href="https://remediafrica.com" style="color: #26B5B9; text-decoration: none;">remediafrica.com</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

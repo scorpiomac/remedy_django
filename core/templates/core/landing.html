@@ -1,0 +1,658 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remedi – Santé digitale simplifiée | Réclamations santé dématérialisées</title>
+    <meta name="description" content="Plateforme de gestion des réclamations santé pour assureurs et IPM. Digitalisez et centralisez vos remboursements santé, réduisez les délais de traitement. Prestataires et assurés connectés." />
+    <meta name="keywords" content="Remedi, réclamations santé, dématérialisation, IPM, prestataires de soins, assurés, gestion des dossiers santé, plateforme santé, mutuelle, réclamation santé Afrique, dématérialisation dossier santé" />
+    <meta name="author" content="Remedi – contact@remediafrica.com" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#0E3B64" />
+    <meta name="geo.region" content="SN" />
+    {% if canonical_url %}<link rel="sitemap" type="application/xml" title="Sitemap" href="{{ sitemap_url }}" />{% endif %}
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16.png' %}">
+    {% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}" />{% endif %}
+    <!-- Open Graph / partage -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Remedi – Santé digitale simplifiée" />
+    <meta property="og:description" content="Plateforme de gestion des réclamations santé pour assureurs et IPM. Digitalisez, centralisez, réduisez les délais. Dossiers dématérialisés, suivi en temps réel." />
+    {% if canonical_url %}<meta property="og:url" content="{{ canonical_url }}" />{% endif %}
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="Remedi" />
+    {% if share_image_url %}
+    <meta property="og:image" content="{{ share_image_url }}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Remedi – Dashboard de pilotage des réclamations santé" />
+    {% endif %}
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Remedi – Santé digitale simplifiée" />
+    <meta name="twitter:description" content="Plateforme de gestion des réclamations santé pour assureurs et IPM. Digitalisez, centralisez, réduisez les délais." />
+    {% if share_image_url %}
+    <meta name="twitter:image" content="{{ share_image_url }}" />
+    <meta name="twitter:image:alt" content="Remedi – Dashboard de pilotage des réclamations santé" />
+    {% endif %}
+    <!-- Données structurées JSON-LD (SEO) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "{{ canonical_url|default:'' }}#organization",
+          "name": "Remedi",
+          "url": "{{ canonical_url|default:'' }}",
+          "logo": "{{ logo_url }}",
+          "description": "Plateforme de gestion des réclamations santé pour assureurs et IPM. Digitalisation, centralisation et réduction des délais de traitement.",
+          "email": "contact@remediafrica.com",
+          "address": { "@type": "PostalAddress", "addressCountry": "SN" }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{ canonical_url|default:'' }}#website",
+          "url": "{{ canonical_url|default:'' }}",
+          "name": "Remedi – Santé digitale simplifiée",
+          "description": "Plateforme de gestion des réclamations santé pour assureurs et IPM. Digitalisez, centralisez, réduisez les délais. Dossiers dématérialisés, suivi en temps réel.",
+          "publisher": { "@id": "{{ canonical_url|default:'' }}#organization" },
+          "inLanguage": "fr-FR",
+          "potentialAction": {
+            "@type": "ReadAction",
+            "target": "{{ canonical_url|default:'' }}"
+          }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "{{ canonical_url|default:'' }}#webpage",
+          "url": "{{ canonical_url|default:'' }}",
+          "name": "Remedi – Santé digitale simplifiée | Réclamations santé dématérialisées",
+          "description": "Plateforme de gestion des réclamations santé pour assureurs et IPM. Digitalisez et centralisez vos remboursements santé, réduisez les délais.",
+          "isPartOf": { "@id": "{{ canonical_url|default:'' }}#website" },
+          "about": { "@id": "{{ canonical_url|default:'' }}#organization" },
+          "inLanguage": "fr-FR"
+        }
+      ]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        remedy: {
+                            teal: '#26B5B9',
+                            blue: '#0E3B64',
+                            'teal-light': '#e0f7f7',
+                        }
+                    },
+                    boxShadow: {
+                        'remedy-teal': '0 0 30px rgba(38, 181, 185, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .selection\:bg-remedy-teal ::selection { background: #26B5B9; color: white; }
+
+        .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.5); }
+        .glass-dark { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.12); }
+
+        .bg-grid { background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px); background-size: 48px 48px; }
+        .bg-grid-dark { background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 48px 48px; }
+
+        .glow-container { position: relative; }
+        .glow-effect { position: absolute; inset: 0; pointer-events: none; opacity: 1; transition: opacity 0.3s; }
+
+        .text-gradient { background: linear-gradient(135deg, #0E3B64 0%, #26B5B9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float-delayed { animation: float 6s ease-in-out infinite 1.5s; }
+
+        @keyframes float-vertical {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-14px); }
+        }
+        .animate-float-vertical {
+            animation: float-vertical 4.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+        }
+        .animate-float-vertical-delayed {
+            animation: float-vertical 4.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite 1.2s;
+        }
+        @media (max-width: 1023px) {
+            .hero-float-card { display: none; }
+        }
+
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal.delay-100 { transition-delay: 0.1s; }
+        .reveal.delay-200 { transition-delay: 0.2s; }
+        .reveal.delay-300 { transition-delay: 0.3s; }
+
+        .feature-card { transition: all 0.35s ease; }
+        .feature-card:hover { background: var(--card-color) !important; color: white; }
+        .feature-card:hover .icon-wrapper { background: rgba(255,255,255,0.2) !important; color: white !important; border-color: rgba(255,255,255,0.3) !important; }
+
+        .nav-logo { height: 2.25rem; width: auto; }
+        @media (min-width: 768px) {
+            .nav-logo { height: 3.9rem; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900" itemscope itemtype="https://schema.org/WebPage">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 glass z-50 border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="#" class="flex items-center" onclick="window.scrollTo(0, 0); return false;">
+                    <img src="{% static 'img/remedi-logo-banner.png' %}" alt="Remedi – Santé digitale simplifiée" class="nav-logo h-9 w-auto">
+                </a>
+
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#solution" class="text-sm font-medium text-slate-600 hover:text-remedy-teal transition-colors">Solution</a>
+                    <a href="#benefices" class="text-sm font-medium text-slate-600 hover:text-remedy-teal transition-colors">Bénéfices</a>
+                    <a href="#fonctionnalites" class="text-sm font-medium text-slate-600 hover:text-remedy-teal transition-colors">Fonctionnalités</a>
+                    <div class="flex items-center gap-4 ml-4">
+                        <a href="{% url 'login' %}" class="text-sm font-semibold text-remedy-blue hover:text-remedy-teal transition-colors">Se connecter</a>
+                        <a href="#contact" class="bg-remedy-teal hover:bg-remedy-teal/90 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-lg shadow-remedy-teal/20 hover:shadow-xl hover:-translate-y-0.5">Demander une démo</a>
+                    </div>
+                </div>
+
+                <button type="button" id="menu-btn" class="md:hidden text-slate-600 p-2 rounded-lg hover:bg-slate-100" aria-label="Menu">
+                    <i class="bi bi-list text-2xl" id="menu-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 pt-2 pb-6 space-y-4 shadow-lg">
+            <a href="#solution" class="block w-full py-2 text-base font-medium text-slate-600">Solution</a>
+            <a href="#benefices" class="block w-full py-2 text-base font-medium text-slate-600">Bénéfices</a>
+            <a href="#fonctionnalites" class="block w-full py-2 text-base font-medium text-slate-600">Fonctionnalités</a>
+            <div class="pt-4 flex flex-col gap-3 border-t border-slate-100">
+                <a href="{% url 'login' %}" class="w-full text-center py-3 text-base font-semibold text-remedy-blue border border-slate-200 rounded-xl">Se connecter</a>
+                <a href="#contact" class="w-full text-center py-3 bg-remedy-teal text-white rounded-xl text-base font-semibold shadow-sm">Demander une démo</a>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main" role="main">
+    <!-- Hero -->
+    <section class="pt-32 pb-20 lg:pt-48 lg:pb-32 relative bg-grid glow-container" aria-label="Présentation Remedi">
+        <div class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 w-[800px] h-[800px] bg-remedy-teal/20 rounded-full blur-[100px] -z-10"></div>
+        <div class="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/3 w-[600px] h-[600px] bg-remedy-blue/10 rounded-full blur-[100px] -z-10"></div>
+        <div class="glow-effect" style="background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(38, 181, 185, 0.15), transparent 40%);"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-8 items-center">
+                <div class="order-1 lg:row-start-1 max-w-2xl reveal">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm text-sm font-semibold mb-6">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-remedy-teal opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-remedy-teal"></span>
+                        </span>
+                        <span class="text-slate-700">Plateforme de gestion des réclamations santé pour assureurs et IPM</span>
+                    </div>
+                    <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-remedy-blue leading-[1.1] tracking-tight mb-6">
+                        Réclamations santé : <span class="text-gradient">centralisez. Accélérez.</span>
+                    </h1>
+                    <p class="text-lg sm:text-xl text-slate-600 mb-6 lg:mb-8 leading-relaxed">
+                        Pour les assureurs, les IPM, les prestataires et les assurés : une seule plateforme pour réduire les délais de traitement, centraliser les flux et suivre chaque réclamation en temps réel.
+                    </p>
+                    <div class="hidden lg:flex flex-col sm:flex-row gap-4">
+                        <a href="#contact" class="flex items-center justify-center gap-2 bg-remedy-teal hover:bg-remedy-teal/90 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                            Demander une démo <i class="bi bi-arrow-right text-lg"></i>
+                        </a>
+                        <a href="#solution" class="flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-remedy-blue border-2 border-slate-200 hover:border-slate-300 px-8 py-4 rounded-full text-base font-semibold transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                            Découvrir la plateforme
+                        </a>
+                    </div>
+                </div>
+
+                <div class="order-2 hidden lg:flex lg:row-span-2 lg:row-start-1 relative w-full min-h-[520px] xl:min-h-[600px] items-center justify-center px-2 reveal delay-200">
+                    <div class="relative w-full max-w-[560px] xl:max-w-[640px]">
+                        <div class="glass p-2 sm:p-3 rounded-2xl lg:rounded-3xl shadow-2xl border border-slate-200/80 bg-white/90">
+                            {% if dashboard_image %}
+                            <img src="{{ dashboard_image }}" alt="Remedi – Dashboard IPM, pilotage des réclamations santé" class="w-full h-auto rounded-xl lg:rounded-2xl shadow-md block">
+                            {% else %}
+                            <img src="{% static 'img/remedi-logo-banner.png' %}" alt="Remedi – Dashboard IPM, pilotage des réclamations santé" class="w-full h-auto rounded-xl lg:rounded-2xl shadow-md block opacity-90">
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="hero-float-card absolute top-4 right-2 sm:top-8 sm:right-4 lg:top-12 lg:right-8 w-48 sm:w-52 glass p-3 sm:p-4 rounded-xl lg:rounded-2xl shadow-xl border border-slate-200/80 bg-white/90 animate-float-vertical z-20">
+                        <div class="flex items-center gap-2 mb-2">
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><i class="bi bi-check-circle-fill text-sm"></i></div>
+                            <div class="min-w-0">
+                                <div class="text-xs sm:text-sm font-bold text-slate-800">Dossier validé</div>
+                                <div class="text-[10px] sm:text-xs text-slate-500">Prêt au paiement</div>
+                            </div>
+                        </div>
+                        <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-500 w-full rounded-full"></div>
+                        </div>
+                    </div>
+
+                    <div class="hero-float-card absolute bottom-4 left-2 sm:bottom-8 sm:left-4 lg:bottom-12 lg:left-8 w-44 sm:w-48 glass p-3 sm:p-4 rounded-xl lg:rounded-2xl shadow-xl border border-slate-200/80 bg-white/90 animate-float-vertical-delayed z-20">
+                        <div class="flex items-center justify-between gap-2 mb-2">
+                            <span class="text-xs font-bold text-slate-800">Délai traitement</span>
+                            <span class="text-xs font-bold text-remedy-teal bg-remedy-teal-light px-1.5 py-0.5 rounded">-40%</span>
+                        </div>
+                        <div class="flex items-end gap-1 h-10">
+                            <div class="flex-1 bg-slate-200 rounded-t h-full"></div>
+                            <div class="flex-1 bg-slate-200 rounded-t h-4/5"></div>
+                            <div class="flex-1 bg-slate-200 rounded-t h-3/5"></div>
+                            <div class="flex-1 bg-remedy-teal rounded-t h-2/5"></div>
+                            <div class="flex-1 bg-remedy-teal rounded-t h-1/5"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-3 lg:hidden flex flex-col sm:flex-row gap-4 reveal">
+                    <a href="#contact" class="flex items-center justify-center gap-2 bg-remedy-teal hover:bg-remedy-teal/90 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">
+                        Demander une démo <i class="bi bi-arrow-right text-lg"></i>
+                    </a>
+                    <a href="#solution" class="flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-remedy-blue border-2 border-slate-200 hover:border-slate-300 px-8 py-4 rounded-full text-base font-semibold transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
+                        Découvrir la plateforme
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-remedy-blue mb-4">Les réclamations santé : un secteur encore trop lourd</h2>
+                <p class="text-lg text-slate-600">Processus manuels, manque de visibilité et délais qui s’accumulent. Il est temps de simplifier.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:-translate-y-2 hover:shadow-xl transition-all duration-300 reveal">
+                    <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-6"><i class="bi bi-pencil-square text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Processus encore largement manuels</h3>
+                    <p class="text-slate-600 leading-relaxed">Saisie papier, envoi de courriers, risque d’erreurs et de perte de dossiers. La digitalisation reste l’exception.</p>
+                </div>
+                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:-translate-y-2 hover:shadow-xl transition-all duration-300 reveal delay-100">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-6"><i class="bi bi-eye-slash text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Manque de visibilité sur l’état des dossiers</h3>
+                    <p class="text-slate-600 leading-relaxed">Assurés et prestataires dans le flou, assureurs et IPM noyés sous les appels de relance.</p>
+                </div>
+                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:-translate-y-2 hover:shadow-xl transition-all duration-300 reveal delay-200">
+                    <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center mb-6"><i class="bi bi-clock-history text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Délais de traitement trop longs</h3>
+                    <p class="text-slate-600 leading-relaxed">Retards de paiement, contentieux et mécontentement des prestataires et des assurés.</p>
+                </div>
+                <div class="bg-slate-50 rounded-3xl p-8 border border-slate-100 hover:-translate-y-2 hover:shadow-xl transition-all duration-300 reveal delay-300">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-200 text-slate-600 flex items-center justify-center mb-6"><i class="bi bi-arrow-left-right text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Multiplication des échanges</h3>
+                    <p class="text-slate-600 leading-relaxed">Entre assureurs, IPM, prestataires et assurés : mails, téléphones, courriers qui s’empilent sans traçabilité claire.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section (Dark) -->
+    <section id="solution" class="py-24 bg-slate-900 text-white relative bg-grid-dark glow-container">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-slate-900/80 z-0"></div>
+        <div class="glow-effect" style="background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(38, 181, 185, 0.15), transparent 40%);"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="reveal">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-remedy-teal-light text-sm font-semibold mb-6">La Solution</div>
+                    <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 leading-tight">Une plateforme unique pour assureurs, IPM, prestataires et assurés</h2>
+                    <p class="text-lg text-slate-300 mb-8 leading-relaxed">Remedi centralise toute la chaîne des réclamations santé sur un seul outil. Dossiers dématérialisés, suivi en temps réel, validation simplifiée et préparation des paiements : tout est tracé et accéléré.</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3"><div class="mt-1 w-5 h-5 rounded-full bg-remedy-teal flex items-center justify-center flex-shrink-0"><i class="bi bi-check text-white text-xs"></i></div><span class="text-slate-200 font-medium">Centralisation des dossiers sur une seule plateforme</span></li>
+                        <li class="flex items-start gap-3"><div class="mt-1 w-5 h-5 rounded-full bg-remedy-teal flex items-center justify-center flex-shrink-0"><i class="bi bi-check text-white text-xs"></i></div><span class="text-slate-200 font-medium">Suivi en temps réel des réclamations</span></li>
+                        <li class="flex items-start gap-3"><div class="mt-1 w-5 h-5 rounded-full bg-remedy-teal flex items-center justify-center flex-shrink-0"><i class="bi bi-check text-white text-xs"></i></div><span class="text-slate-200 font-medium">Validation simplifiée entre les différents acteurs</span></li>
+                        <li class="flex items-start gap-3"><div class="mt-1 w-5 h-5 rounded-full bg-remedy-teal flex items-center justify-center flex-shrink-0"><i class="bi bi-check text-white text-xs"></i></div><span class="text-slate-200 font-medium">Préparation et suivi des paiements</span></li>
+                    </ul>
+                </div>
+                <div class="relative reveal delay-200">
+                    <div class="glass-dark rounded-3xl p-8 flex flex-col items-center justify-center gap-6 relative">
+                        <div class="w-full max-w-sm glass-dark p-3 rounded-2xl flex items-center gap-4 z-10">
+                            <div class="w-10 h-10 rounded-full bg-remedy-teal flex items-center justify-center text-white shadow-[0_0_30px_rgba(38,181,185,0.5)]"><i class="bi bi-heart-pulse text-xl"></i></div>
+                            <div><div class="text-sm font-bold text-white">Prestataire</div><div class="text-xs text-slate-300">Soumet le dossier</div></div>
+                        </div>
+                        <div class="w-1 h-6 bg-gradient-to-b from-remedy-teal to-purple-500 rounded-full"></div>
+                        <div class="w-full max-w-sm glass-dark p-3 rounded-2xl flex items-center gap-4 ml-4 z-10">
+                            <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white"><i class="bi bi-person-check text-xl"></i></div>
+                            <div><div class="text-sm font-bold text-white">Patient</div><div class="text-xs text-slate-300">Valide les soins</div></div>
+                        </div>
+                        <div class="w-1 h-6 bg-gradient-to-b from-purple-500 to-blue-500 rounded-full"></div>
+                        <div class="w-full max-w-sm glass-dark p-3 rounded-2xl flex items-center gap-4 ml-8 z-10">
+                            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white"><i class="bi bi-building text-xl"></i></div>
+                            <div><div class="text-sm font-bold text-white">Assureur / IPM</div><div class="text-xs text-slate-300">Traite & Valide</div></div>
+                        </div>
+                        <div class="w-1 h-6 bg-gradient-to-b from-blue-500 to-emerald-500 rounded-full"></div>
+                        <div class="w-full max-w-sm glass-dark p-3 rounded-2xl flex items-center gap-4 ml-4 z-10">
+                            <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white"><i class="bi bi-credit-card text-xl"></i></div>
+                            <div><div class="text-sm font-bold text-white">Paiement</div><div class="text-xs text-slate-300">Règlement rapide</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bento Benefits -->
+    <section id="benefices" class="py-24 bg-slate-50 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-remedy-blue mb-4">Des bénéfices concrets pour chaque acteur</h2>
+                <p class="text-lg text-slate-600">Une plateforme pensée pour fluidifier les échanges et faire gagner du temps à tous.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6">
+                <div class="md:col-span-2 md:row-span-2 bg-remedy-blue text-white rounded-[2rem] p-10 relative overflow-hidden reveal shadow-xl glow-container">
+                    <div class="absolute top-0 right-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl z-0"></div>
+                    <div class="glow-effect" style="background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.12), transparent 40%);"></div>
+                    <div class="relative z-10">
+                        <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-8 border border-white/20"><i class="bi bi-building text-3xl"></i></div>
+                        <h3 class="text-3xl font-bold mb-4">Pour les assureurs et IPM</h3>
+                        <p class="text-blue-100 text-lg mb-6 max-w-md leading-relaxed">Pilotez vos réclamations et vos paiements depuis une seule interface. Moins d’appels, plus de visibilité.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-center gap-3 text-sm text-white font-medium"><div class="w-6 h-6 rounded-full bg-remedy-teal/20 flex items-center justify-center"><i class="bi bi-check text-remedy-teal"></i></div> Centralisation des flux</li>
+                            <li class="flex items-center gap-3 text-sm text-white font-medium"><div class="w-6 h-6 rounded-full bg-remedy-teal/20 flex items-center justify-center"><i class="bi bi-check text-remedy-teal"></i></div> Suivi des dossiers en temps réel</li>
+                            <li class="flex items-center gap-3 text-sm text-white font-medium"><div class="w-6 h-6 rounded-full bg-remedy-teal/20 flex items-center justify-center"><i class="bi bi-check text-remedy-teal"></i></div> Réduction des délais de traitement</li>
+                            <li class="flex items-center gap-3 text-sm text-white font-medium"><div class="w-6 h-6 rounded-full bg-remedy-teal/20 flex items-center justify-center"><i class="bi bi-check text-remedy-teal"></i></div> Meilleure visibilité sur les volumes et paiements</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="bg-white rounded-[2rem] p-8 shadow-lg border border-slate-100 reveal delay-100">
+                    <div class="w-12 h-12 rounded-xl bg-teal-50 text-remedy-teal flex items-center justify-center mb-6"><i class="bi bi-heart-pulse text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Pour les prestataires</h3>
+                    <p class="text-slate-600 mb-6 text-sm leading-relaxed">Soumettez vos dossiers en quelques clics et suivez l’avancement jusqu’au paiement.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-slate-700 font-semibold"><i class="bi bi-check text-remedy-teal"></i> Soumission simple des dossiers</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700 font-semibold"><i class="bi bi-check text-remedy-teal"></i> Suivi de l’avancement</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700 font-semibold"><i class="bi bi-check text-remedy-teal"></i> Paiements plus rapides</li>
+                    </ul>
+                </div>
+                <div class="bg-remedy-teal-light rounded-[2rem] p-8 shadow-lg border border-white reveal delay-200">
+                    <div class="w-12 h-12 rounded-xl bg-white text-remedy-blue flex items-center justify-center mb-6 shadow-sm"><i class="bi bi-person text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-remedy-blue mb-3">Pour les assurés</h3>
+                    <p class="text-slate-700 mb-6 text-sm leading-relaxed">Validez vos dossiers simplement et suivez vos remboursements en toute transparence.</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2 text-sm text-slate-700 font-semibold"><i class="bi bi-check text-remedy-teal"></i> Validation simple des dossiers</li>
+                        <li class="flex items-center gap-2 text-sm text-slate-700 font-semibold"><i class="bi bi-check text-remedy-teal"></i> Meilleure transparence sur les remboursements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="fonctionnalites" class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-remedy-blue mb-4">Toutes les fonctionnalités dont vous avez besoin</h2>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal feature-card" style="--card-color: #0E3B64;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-file-earmark-check text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Dossiers de réclamation</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Création, pièces jointes, suivi des statuts (brouillon → soumis → validé → payé).</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal delay-100 feature-card" style="--card-color: #26B5B9;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-shield-check text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Validation patient</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Lien unique sécurisé pour que l'assuré valide son dossier à distance.</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal delay-200 feature-card" style="--card-color: #8B5CF6;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-graph-up text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Formules de couverture</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Gestion des formules et des règles de prise en charge par assureur et IPM.</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal delay-300 feature-card" style="--card-color: #F59E0B;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-credit-card text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Moyens de paiement</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Virement, mobile money, chèque : chaque établissement configure les siens.</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal feature-card" style="--card-color: #10B981;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-grid-3x3-gap text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Tableaux de bord</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Statistiques en temps réel sur les délais, les montants et les volumes traités.</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal delay-100 feature-card" style="--card-color: #F43F5E;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-bell text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Notifications</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Alertes automatiques à chaque changement de statut important d'un dossier.</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal delay-200 feature-card" style="--card-color: #3B82F6;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-people text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Gestion des rôles</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Droits d'accès granulaires (saisie, validation, paiement, administration).</p>
+                </div>
+                <div class="p-6 rounded-3xl bg-slate-50 border border-slate-100 group reveal delay-300 feature-card" style="--card-color: #6366F1;">
+                    <div class="icon-wrapper w-12 h-12 rounded-xl bg-white text-remedy-teal flex items-center justify-center mb-4 shadow-sm border border-slate-100"><i class="bi bi-database text-xl"></i></div>
+                    <h3 class="text-lg font-bold mb-2 text-slate-800 group-hover:text-white transition-colors duration-300">Référentiels</h3>
+                    <p class="text-sm text-slate-600 group-hover:text-blue-100 leading-relaxed transition-colors duration-300">Gestion centralisée des actes médicaux, médicaments et tarifs conventionnés.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust / Témoignages -->
+    <section class="py-24 bg-remedy-blue text-white relative overflow-hidden glow-container">
+        <div class="absolute inset-0 bg-grid-dark opacity-20 z-0"></div>
+        <div class="glow-effect" style="background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(38, 181, 185, 0.25), transparent 40%);"></div>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-12 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Ils nous font confiance</h2>
+                <p class="text-blue-100 text-lg">Assureurs, IPM et prestataires qui ont simplifié leur gestion des réclamations santé.</p>
+            </div>
+            <div class="space-y-8 reveal">
+                {% for testimonial in testimonials %}
+                <div class="glass-dark p-8 rounded-3xl relative">
+                    <i class="bi bi-quote absolute top-6 right-8 text-white/10 text-4xl"></i>
+                    <p class="text-blue-100 italic mb-6 text-lg leading-relaxed">"{{ testimonial.quote }}"</p>
+                    <div><div class="font-bold text-white">{{ testimonial.author }}</div><div class="text-sm text-remedy-teal">{{ testimonial.role_or_organisation }}</div></div>
+                </div>
+                {% empty %}
+                <div class="glass-dark p-8 rounded-3xl relative">
+                    <i class="bi bi-quote absolute top-6 right-8 text-white/10 text-4xl"></i>
+                    <p class="text-blue-100 italic mb-6 text-lg leading-relaxed">"Remedi a transformé notre gestion quotidienne. Nous avons réduit nos délais de traitement et nos prestataires sont ravis de la transparence."</p>
+                    <div><div class="font-bold text-white">Aminata Diallo</div><div class="text-sm text-remedy-teal">Directrice des opérations, IPM Horizon Santé</div></div>
+                </div>
+                <div class="glass-dark p-8 rounded-3xl relative">
+                    <i class="bi bi-quote absolute top-6 right-8 text-white/10 text-4xl"></i>
+                    <p class="text-blue-100 italic mb-6 text-lg leading-relaxed">"Je soumets mes factures en ligne en quelques clics et je suis payé beaucoup plus rapidement qu'avant. Un vrai gain de temps."</p>
+                    <div><div class="font-bold text-white">Dr. Ousmane Fall</div><div class="text-sm text-remedy-teal">Clinique de l'Espoir</div></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Security -->
+    <section class="py-24 bg-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-remedy-blue mb-4">Sécurité et conformité</h2>
+                <p class="text-lg text-slate-600">Vos données de santé sont sensibles. Nous appliquons les plus hauts standards de sécurité.</p>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="reveal">
+                    <div class="w-12 h-12 rounded-xl bg-remedy-teal-light text-remedy-teal flex items-center justify-center mb-4"><i class="bi bi-hdd-network text-xl"></i></div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Hébergement sécurisé</h3>
+                    <p class="text-sm text-slate-600">Hébergement maîtrisé, redondance et sauvegardes régulières garanties.</p>
+                </div>
+                <div class="reveal delay-100">
+                    <div class="w-12 h-12 rounded-xl bg-remedy-teal-light text-remedy-teal flex items-center justify-center mb-4"><i class="bi bi-lock text-xl"></i></div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Accès ultra-sécurisé</h3>
+                    <p class="text-sm text-slate-600">Authentification forte, gestion stricte des rôles : chaque assureur et chaque IPM ne voit que ses dossiers.</p>
+                </div>
+                <div class="reveal delay-200">
+                    <div class="w-12 h-12 rounded-xl bg-remedy-teal-light text-remedy-teal flex items-center justify-center mb-4"><i class="bi bi-shield-check text-xl"></i></div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Respect de la vie privée</h3>
+                    <p class="text-sm text-slate-600">Données à caractère personnel traitées dans le strict respect du RGPD et des normes santé.</p>
+                </div>
+                <div class="reveal delay-300">
+                    <div class="w-12 h-12 rounded-xl bg-remedy-teal-light text-remedy-teal flex items-center justify-center mb-4"><i class="bi bi-file-earmark-check text-xl"></i></div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Traçabilité totale</h3>
+                    <p class="text-sm text-slate-600">Historique complet et inaltérable des actions pour faciliter l'audit et la conformité.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="py-24 bg-slate-50 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-[2rem] shadow-2xl border border-slate-100 p-8 md:p-12 reveal">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl md:text-4xl font-bold text-remedy-blue mb-4">Prêt à simplifier vos réclamations ?</h2>
+                    <p class="text-lg text-slate-600">Demandez une démo personnalisée ou contactez-nous pour en savoir plus.</p>
+                </div>
+                {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                    <div class="p-4 rounded-xl {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-rose-50 text-rose-800 border border-rose-200{% endif %}" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form class="space-y-6" action="{% url 'demo_request_submit' %}" method="post">
+                    {% csrf_token %}
+                    {% with input_class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-remedy-teal focus:border-remedy-teal outline-none transition-all" error_class="border-rose-500 focus:border-rose-500 focus:ring-rose-500" %}
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Prénom</label>
+                            <input type="text" name="first_name" required class="{{ input_class }}{% if demo_errors.first_name %} {{ error_class }}{% endif %}" placeholder="Jean" value="{{ demo_submitted.first_name|default:'' }}" />
+                            {% if demo_errors.first_name %}<p class="mt-1 text-sm text-rose-600">{{ demo_errors.first_name.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Nom</label>
+                            <input type="text" name="last_name" required class="{{ input_class }}{% if demo_errors.last_name %} {{ error_class }}{% endif %}" placeholder="Dupont" value="{{ demo_submitted.last_name|default:'' }}" />
+                            {% if demo_errors.last_name %}<p class="mt-1 text-sm text-rose-600">{{ demo_errors.last_name.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Email professionnel</label>
+                            <input type="email" name="email" required class="{{ input_class }}{% if demo_errors.email %} {{ error_class }}{% endif %}" placeholder="jean@organisation.com" value="{{ demo_submitted.email|default:'' }}" />
+                            {% if demo_errors.email %}<p class="mt-1 text-sm text-rose-600">{{ demo_errors.email.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Téléphone</label>
+                            <input type="tel" name="phone" class="{{ input_class }}" placeholder="+221 77 000 00 00" value="{{ demo_submitted.phone|default:'' }}" />
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Organisation</label>
+                            <input type="text" name="organisation" required class="{{ input_class }}{% if demo_errors.organisation %} {{ error_class }}{% endif %}" placeholder="Nom de votre structure" value="{{ demo_submitted.organisation|default:'' }}" />
+                            {% if demo_errors.organisation %}<p class="mt-1 text-sm text-rose-600">{{ demo_errors.organisation.0 }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Vous êtes...</label>
+                            <select name="profile" required class="{{ input_class }}{% if demo_errors.profile %} {{ error_class }}{% endif %}">
+                                <option value="">Sélectionnez un profil</option>
+                                <option value="ipm" {% if demo_submitted.profile == 'ipm' %}selected{% endif %}>IPM / Mutuelle</option>
+                                <option value="prestataire" {% if demo_submitted.profile == 'prestataire' %}selected{% endif %}>Prestataire de soins (Médecin, Clinique, Pharmacie)</option>
+                                <option value="patient" {% if demo_submitted.profile == 'patient' %}selected{% endif %}>Patient / Assuré</option>
+                                <option value="partenaire" {% if demo_submitted.profile == 'partenaire' %}selected{% endif %}>Partenaire</option>
+                                <option value="autre" {% if demo_submitted.profile == 'autre' %}selected{% endif %}>Autre</option>
+                            </select>
+                            {% if demo_errors.profile %}<p class="mt-1 text-sm text-rose-600">{{ demo_errors.profile.0 }}</p>{% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Votre besoin</label>
+                        <textarea name="message" rows="4" class="{{ input_class }}{% if demo_errors.message %} {{ error_class }}{% endif %} resize-none" placeholder="Décrivez brièvement votre besoin...">{{ demo_submitted.message|default:'' }}</textarea>
+                        {% if demo_errors.message %}<p class="mt-1 text-sm text-rose-600">{{ demo_errors.message.0 }}</p>{% endif %}
+                    </div>
+                    {% endwith %}
+                    <div class="pt-4 flex justify-center">
+                        <button type="submit" class="w-full sm:w-auto px-10 py-4 bg-remedy-teal hover:bg-remedy-teal/90 text-white rounded-full font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-1">Demander une démo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center gap-2 mb-6">
+                        <img src="{% static 'img/remedi-logo-banner.png' %}" alt="Remedi" class="h-8 w-auto brightness-0 invert opacity-95">
+                    </div>
+                    <p class="text-sm text-slate-500 max-w-xs leading-relaxed">Plateforme de gestion des réclamations santé pour assureurs et IPM : digitalisation, centralisation des flux et réduction des délais.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Produit</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#solution" class="hover:text-remedy-teal transition-colors">Découvrir la plateforme</a></li>
+                        <li><a href="{% url 'login' %}" class="hover:text-remedy-teal transition-colors">Se connecter</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4">Contact</h4>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-remedy-teal transition-colors">Mentions légales</a></li>
+                        <li class="text-slate-300">contact@remediafrica.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-slate-800 text-sm text-slate-600 flex justify-between items-center">
+                <p>© 2026 REMEDY. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function() {
+            var menuBtn = document.getElementById('menu-btn');
+            var mobileMenu = document.getElementById('mobile-menu');
+            var menuIcon = document.getElementById('menu-icon');
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                    if (menuIcon) {
+                        if (mobileMenu.classList.contains('hidden')) { menuIcon.classList.remove('bi-x'); menuIcon.classList.add('bi-list'); }
+                        else { menuIcon.classList.remove('bi-list'); menuIcon.classList.add('bi-x'); }
+                    }
+                });
+            }
+            document.querySelectorAll('#mobile-menu a').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.add('hidden');
+                    if (menuIcon) { menuIcon.classList.remove('bi-x'); menuIcon.classList.add('bi-list'); }
+                });
+            });
+
+            var revealElements = document.querySelectorAll('.reveal');
+            var revealObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) entry.target.classList.add('active');
+                });
+            }, { threshold: 0.1 });
+            revealElements.forEach(function(el) { revealObserver.observe(el); });
+
+            document.querySelectorAll('.glow-container').forEach(function(container) {
+                container.addEventListener('mousemove', function(e) {
+                    var rect = container.getBoundingClientRect();
+                    container.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+                    container.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

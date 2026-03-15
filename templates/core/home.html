@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Accueil - REMEDY{% endblock %}
+
+{% block content_public %}
+<div class="sm:mx-auto sm:w-full sm:max-w-2xl">
+    <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+        <div class="relative px-6 pt-16 pb-20 sm:px-10 sm:pt-24 sm:pb-28 lg:px-12">
+            <div class="relative mx-auto max-w-2xl text-center">
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                    <span class="block text-brand-600 mb-2">REMEDY 2026</span>
+                    <span class="block">Santé Digitale Simplifiée</span>
+                </h1>
+                <p class="mt-4 text-lg leading-8 text-slate-600">
+                    Plateforme de gestion des prises en charge, sécurisée par empreinte numérique et validation patient temps réel.
+                </p>
+                <div class="mt-10 flex gap-x-6 justify-center">
+                    <a href="{% url 'login' %}" class="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">
+                        Connexion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+    <div class="relative px-6 pt-16 pb-20 sm:px-10 sm:pt-24 sm:pb-28 lg:px-12">
+        <div class="relative mx-auto max-w-2xl text-center">
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                <span class="block text-brand-600 mb-2">REMEDY 2026</span>
+                <span class="block">Santé Digitale Simplifiée</span>
+            </h1>
+            <p class="mt-4 text-lg leading-8 text-slate-600">
+                Plateforme de gestion des prises en charge, sécurisée par empreinte numérique et validation patient temps réel.
+            </p>
+            <div class="mt-10 flex gap-x-6 justify-center">
+                {% if user.is_superuser %}
+                    <a href="{% url 'superadmin_dashboard' %}" class="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Dashboard Superadmin</a>
+                {% else %}
+                    <a href="{% url 'claim_list' %}" class="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">Accéder à mes dossiers</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

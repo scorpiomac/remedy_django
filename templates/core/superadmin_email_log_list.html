@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Logs des emails – Backoffice Remedi{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Logs des emails</h2>
+        <p class="mt-1 text-sm text-slate-500">Tous les emails envoyés par le système, avec statut et possibilité de renvoi.</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a href="{% url 'superadmin_dashboard' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour au dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="mb-6 flex flex-wrap items-center gap-2">
+    <span class="text-sm font-medium text-slate-600">Statut :</span>
+    <a href="{% url 'superadmin_email_log_list' %}" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if not status_filter %}bg-brand-100 text-brand-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Tous</a>
+    <a href="{% url 'superadmin_email_log_list' %}?status=sent" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if status_filter == 'sent' %}bg-emerald-100 text-emerald-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Envoyés</a>
+    <a href="{% url 'superadmin_email_log_list' %}?status=failed" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if status_filter == 'failed' %}bg-rose-100 text-rose-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Échecs</a>
+    <span class="ml-4 text-sm font-medium text-slate-600">Type :</span>
+    <a href="{% url 'superadmin_email_log_list' %}{% if status_filter %}?status={{ status_filter }}{% endif %}" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if not type_filter %}bg-brand-100 text-brand-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Tous</a>
+    <a href="{% url 'superadmin_email_log_list' %}?type=demo_team{% if status_filter %}&status={{ status_filter }}{% endif %}" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if type_filter == 'demo_team' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Démo équipe</a>
+    <a href="{% url 'superadmin_email_log_list' %}?type=demo_client{% if status_filter %}&status={{ status_filter }}{% endif %}" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if type_filter == 'demo_client' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Démo client</a>
+    <a href="{% url 'superadmin_email_log_list' %}?type=claim_notification{% if status_filter %}&status={{ status_filter }}{% endif %}" class="rounded-lg px-3 py-1.5 text-sm font-medium {% if type_filter == 'claim_notification' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Réclamation</a>
+</div>
+
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+    <div class="px-5 py-4 sm:px-6 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-50/80 to-white">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2">
+            <span class="w-1 h-5 rounded-full bg-brand-500"></span>
+            {{ email_logs|length }} email(s)
+        </h3>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Destinataires</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Objet</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Type</th>
+                    <th class="px-5 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Statut</th>
+                    <th class="px-5 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for log in email_logs %}
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-5 py-3 text-sm text-slate-600 whitespace-nowrap">{{ log.sent_at|date:"d/m/Y H:i" }}</td>
+                    <td class="px-5 py-3 text-sm text-slate-700 max-w-xs truncate" title="{{ log.to_emails }}">{{ log.to_emails|truncatewords:8 }}</td>
+                    <td class="px-5 py-3 text-sm text-slate-700 max-w-md truncate" title="{{ log.subject }}">{{ log.subject|truncatewords:10 }}</td>
+                    <td class="px-5 py-3 text-sm text-slate-600">{{ log.get_email_type_display }}</td>
+                    <td class="px-5 py-3">
+                        {% if log.status == 'sent' %}<span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Envoyé</span>
+                        {% else %}<span class="inline-flex rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-800">Échec</span>{% endif %}
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                        <a href="{% url 'superadmin_email_log_detail' log.pk %}" class="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-100">
+                            <i class="bi bi-eye"></i> Voir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-5 py-12 text-center text-slate-500">
+                        <i class="bi bi-envelope text-4xl text-slate-300 mb-2"></i>
+                        <p>Aucun email enregistré.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

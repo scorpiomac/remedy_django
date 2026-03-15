@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+{% block title %}Claim #{{ claim.id }} - REMEDY{% endblock %}
+{% block content %}
+<div class="lg:flex lg:items-center lg:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol role="list" class="flex items-center space-x-4">
+                <li>
+                    <div class="flex">
+                        <a href="{% url 'claim_list' %}" class="text-sm font-medium text-slate-500 hover:text-slate-700">Dossiers</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 flex-shrink-0 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" /></svg>
+                        <span class="ml-4 text-sm font-medium text-slate-500">#{{ claim.id }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        <h2 class="mt-2 text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">
+            Dossier #{{ claim.id }}
+            {% if claim.status == "BLOCKED" %}
+                <span class="ml-2 inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 align-middle">{{ claim.get_status_display }}</span>
+            {% elif claim.status == "SUBMITTED" %}
+                <span class="ml-2 inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 align-middle">{{ claim.get_status_display }}</span>
+            {% elif claim.status == "LOCKED" %}
+                <span class="ml-2 inline-flex items-center rounded-full bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/10 align-middle">{{ claim.get_status_display }}</span>
+            {% elif claim.status == "READY_FOR_PAYMENT" %}
+                <span class="ml-2 inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20 align-middle">{{ claim.get_status_display }}</span>
+            {% else %}
+                <span class="ml-2 inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10 align-middle">{{ claim.get_status_display }}</span>
+            {% endif %}
+        </h2>
+    </div>
+    <div class="mt-5 flex lg:ml-4 lg:mt-0 gap-3">
+        {% if claim.status == "DRAFT" and can_edit_claim %}
+            <a href="{% url 'claim_edit' claim.id %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50 transition-all"><i class="bi bi-pencil"></i> Modifier</a>
+        {% endif %}
+        <a href="{% url 'claim_list' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50 transition-all"><i class="bi bi-arrow-left"></i> Retour</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-3">
+    <!-- Main Info -->
+    <div class="lg:col-span-2 space-y-8">
+        
+        {% if ipm_share is not None %}
+        <!-- Amounts Card (inspiration PHP) -->
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-cash-stack text-brand-600"></i> Montants</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="amount-display">
+                        <small class="text-slate-500 block">Montant Total</small>
+                        <div class="amount text-brand-600">{{ claim.total_amount }} FCFA</div>
+                    </div>
+                    <div class="amount-display" style="border-color: #10b981">
+                        <small class="text-slate-500 block">Part IPM ({{ coverage_percent }}%)</small>
+                        <div class="amount text-emerald-600">{{ ipm_share }} FCFA</div>
+                    </div>
+                    <div class="amount-display" style="border-color: #f59e0b">
+                        <small class="text-slate-500 block">Part Patient</small>
+                        <div class="amount text-amber-600">{{ patient_share }} FCFA</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Details Card -->
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-info-circle text-brand-600"></i> Informations Patient & Soins</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-slate-500">Patient</dt>
+                        <dd class="mt-1 text-sm text-slate-900 font-semibold">{{ claim.patient.full_name }}</dd>
+                        <dd class="text-xs text-slate-500">{{ claim.patient.member_number }}</dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-slate-500">Assurance (IPM)</dt>
+                        <dd class="mt-1 text-sm text-slate-900">{{ claim.patient.ipm.name }}</dd>
+                        {% if claim.patient.coverage_plan %}
+                        <dd class="text-xs text-brand-600 font-medium mt-0.5">Formule: {{ claim.patient.coverage_plan.name }}</dd>
+                        {% endif %}
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-slate-500">Catégorie</dt>
+                        <dd class="mt-1 text-sm text-slate-900">{{ claim.category.name }}</dd>
+                    </div>
+                    {% if claim.care_date %}
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-slate-500">Date des soins</dt>
+                        <dd class="mt-1 text-sm text-slate-900">{{ claim.care_date|date:"d/m/Y" }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if claim.invoice_number %}
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-slate-500">N° facture / Référence</dt>
+                        <dd class="mt-1 text-sm text-slate-900">{{ claim.invoice_number }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if not ipm_share %}
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-slate-500">Montant Total</dt>
+                        <dd class="mt-1 text-lg font-bold text-brand-600">{{ claim.total_amount }} FCFA</dd>
+                    </div>
+                    {% endif %}
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-slate-500">Détails / Médicaments</dt>
+                        <dd class="mt-1 text-sm text-slate-900 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            {{ claim.medicine_names|default:"Non spécifié"|linebreaksbr }}
+                        </dd>
+                    </div>
+                    
+                    {% if claim.block_reason %}
+                    <div class="sm:col-span-2">
+                        <div class="rounded-md bg-red-50 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">Motif du blocage</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <p>{{ claim.block_reason }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <!-- Moyens de paiement du prestataire (pour que l'IPM puisse payer) -->
+        {% if provider_hospital or provider_payment_options %}
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-credit-card-2-back text-brand-600"></i> Moyens de paiement du prestataire</h3>
+                <p class="text-xs text-slate-500 mt-1">Pour régler l'établissement (hôpital, clinique, pharmacie) après validation du dossier.</p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                {% if provider_hospital %}
+                <p class="text-sm font-medium text-slate-800 mb-4">{{ provider_hospital.get_establishment_type_display }} : {{ provider_hospital.name }}</p>
+                {% endif %}
+                {% if provider_payment_options %}
+                <ul class="space-y-4">
+                    {% for opt in provider_payment_options %}
+                    <li class="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+                        <span class="font-medium text-slate-900">{{ opt.payment_method.name }}</span>
+                        <span class="text-xs text-slate-500">({{ opt.payment_method.get_method_type_display }})</span>
+                        <dl class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                            {% if opt.phone %}
+                            <div><dt class="text-slate-500 inline">Tél. </dt><dd class="inline font-medium text-slate-900">{{ opt.phone }}</dd></div>
+                            {% endif %}
+                            {% if opt.iban %}
+                            <div><dt class="text-slate-500 inline">IBAN </dt><dd class="inline font-medium text-slate-900">{{ opt.iban }}</dd></div>
+                            {% endif %}
+                            {% if opt.bank_name %}
+                            <div><dt class="text-slate-500 inline">Banque </dt><dd class="inline font-medium text-slate-900">{{ opt.bank_name }}</dd></div>
+                            {% endif %}
+                            {% if opt.payee_name %}
+                            <div><dt class="text-slate-500 inline">À l'ordre de </dt><dd class="inline font-medium text-slate-900">{{ opt.payee_name }}</dd></div>
+                            {% endif %}
+                            {% if opt.reference_notes %}
+                            <div class="sm:col-span-2"><dt class="text-slate-500 inline">Référence </dt><dd class="inline text-slate-900">{{ opt.reference_notes }}</dd></div>
+                            {% endif %}
+                        </dl>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-sm text-slate-500">Aucun moyen de paiement configuré pour cet établissement. À configurer dans <strong>Hôpitaux / Pharmacies</strong> → modifier l'établissement.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Documents -->
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-paperclip text-brand-600"></i> Documents Justificatifs</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                {% if claim.status == "DRAFT" and can_edit_claim %}
+                    <form method="post" enctype="multipart/form-data" class="mb-6 pb-6 border-b border-slate-100">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="upload_document">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Type de document</label>
+                                {{ upload_form.document_type }}
+                            </div>
+                        </div>
+                        <p class="block text-sm font-medium text-slate-700 mb-2">Fichiers</p>
+                        <label class="upload-zone block cursor-pointer">
+                            <input type="file" name="documents" multiple class="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            <i class="bi bi-cloud-arrow-up text-3xl text-slate-400 block mb-2"></i>
+                            <p class="text-slate-600 text-sm mb-1">Cliquez ou glissez un fichier ici</p>
+                            <small class="text-slate-400">PDF, JPG, PNG, DOC — Max 10MB</small>
+                        </label>
+                        <button type="submit" class="mt-3 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-500 transition-all">
+                            <i class="bi bi-upload"></i> Uploader
+                        </button>
+                    </form>
+                {% endif %}
+
+                <ul role="list" class="divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden">
+                    {% for doc in documents %}
+                    <li class="flex items-center justify-between py-3 pl-4 pr-4 text-sm bg-white hover:bg-slate-50/50 transition-colors">
+                        <div class="flex flex-1 items-center gap-3">
+                            <i class="bi bi-file-earmark text-brand-500 text-lg"></i>
+                            <div>
+                                <span class="truncate font-medium text-slate-900 block">{{ doc.original_name }}</span>
+                                <span class="text-xs text-slate-500">{{ doc.get_document_type_display }}</span>
+                            </div>
+                        </div>
+                        <a href="{{ doc.file.url }}" target="_blank" class="flex-shrink-0 inline-flex items-center gap-1 font-medium text-brand-600 hover:text-brand-500">
+                            <i class="bi bi-download text-sm"></i> Télécharger
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li class="py-4 px-4 text-center text-sm text-slate-500 italic">Aucun document joint.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        {% if user.is_superuser and claim.snapshot_json %}
+        <div class="bg-slate-900 shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-5 sm:px-6 border-b border-slate-700/50">
+                <h3 class="text-base font-semibold leading-6 text-white">Snapshot de sécurité (Blockchain-ready)</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6 overflow-x-auto">
+                <pre class="text-xs text-brand-300 font-mono">{{ claim.snapshot_json|pprint }}</pre>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-8">
+        
+        <!-- Timeline (inspiration PHP) -->
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-clock-history text-brand-600"></i> Historique</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <div class="audit-timeline">
+                    {% if claim.created_at %}
+                    <div class="timeline-item">
+                        <strong>Création</strong><br>
+                        <small class="text-slate-500">{{ claim.created_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% endif %}
+                    {% if claim.submitted_at %}
+                    <div class="timeline-item">
+                        <strong>Soumission</strong><br>
+                        <small class="text-slate-500">{{ claim.submitted_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% endif %}
+                    {% if claim.locked_at %}
+                    <div class="timeline-item">
+                        <strong>Verrouillage</strong><br>
+                        <small class="text-slate-500">{{ claim.locked_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% endif %}
+                    {% if claim.token_used_at %}
+                    <div class="timeline-item">
+                        <strong>Confirmation Patient</strong><br>
+                        <small class="text-slate-500">{{ claim.token_used_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-diagram-3 text-brand-600"></i> Workflow</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6 space-y-4">
+                <!-- Soumissions : étapes clés -->
+                <div class="rounded-lg border border-slate-200 bg-slate-50/50 p-3">
+                    <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Soumissions</h4>
+                    <ul class="space-y-1.5 text-sm">
+                        <li class="flex items-center gap-2 text-slate-700">
+                            {% if claim.created_at %}
+                                <i class="bi bi-plus-circle-fill text-slate-400 text-xs"></i>
+                                <span>Créé le {{ claim.created_at|date:"d/m/Y H:i" }}</span>
+                            {% else %}
+                                <span class="text-slate-400">— Création</span>
+                            {% endif %}
+                        </li>
+                        <li class="flex items-center gap-2 {% if claim.submitted_at %}text-slate-700{% else %}text-slate-400{% endif %}">
+                            {% if claim.submitted_at %}
+                                <i class="bi bi-send-fill text-brand-500 text-xs"></i>
+                                <span>Soumis le {{ claim.submitted_at|date:"d/m/Y H:i" }}</span>
+                            {% else %}
+                                <i class="bi bi-send text-xs"></i>
+                                <span>Non soumis</span>
+                            {% endif %}
+                        </li>
+                        <li class="flex items-center gap-2 {% if claim.locked_at %}text-slate-700{% else %}text-slate-400{% endif %}">
+                            {% if claim.locked_at %}
+                                <i class="bi bi-lock-fill text-amber-500 text-xs"></i>
+                                <span>Verrouillé le {{ claim.locked_at|date:"d/m/Y H:i" }}</span>
+                            {% else %}
+                                <i class="bi bi-lock text-xs"></i>
+                                <span>Non verrouillé</span>
+                            {% endif %}
+                        </li>
+                        <li class="flex items-center gap-2 {% if claim.token_used_at %}text-slate-700{% else %}text-slate-400{% endif %}">
+                            {% if claim.token_used_at %}
+                                <i class="bi bi-check-circle-fill text-emerald-500 text-xs"></i>
+                                <span>Patient a validé le {{ claim.token_used_at|date:"d/m/Y H:i" }}</span>
+                            {% else %}
+                                <i class="bi bi-person-check text-xs"></i>
+                                <span>En attente validation patient</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                    {% if audit_logs %}
+                    <details class="mt-2">
+                        <summary class="text-xs font-medium text-slate-500 cursor-pointer hover:text-slate-700">Voir l’historique détaillé</summary>
+                        <ul class="mt-2 space-y-1 text-xs text-slate-600 max-h-32 overflow-y-auto">
+                            {% for log in audit_logs %}
+                            <li>{{ log.created_at|date:"d/m/Y H:i" }} — {{ log.event }}{% if log.notes %}: {{ log.notes|truncatewords:12 }}{% endif %}</li>
+                            {% endfor %}
+                        </ul>
+                    </details>
+                    {% endif %}
+                </div>
+
+                {% if claim.status == "DRAFT" and can_edit_claim %}
+                    <div class="rounded-md bg-blue-50 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <div class="ml-3 flex-1 md:flex md:justify-between">
+                                <p class="text-sm text-blue-700">Ce dossier est un brouillon. Vérifiez tout avant soumission.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="submit">
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg hover:from-brand-500 hover:to-brand-600 transition-all"><i class="bi bi-send"></i> Soumettre le dossier</button>
+                    </form>
+                    <form method="post" action="{% url 'claim_delete' claim.id %}" onsubmit="return confirm('Supprimer ce brouillon ?');">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-red-600 shadow-sm ring-1 ring-red-300/50 hover:bg-red-50 transition-all"><i class="bi bi-trash"></i> Supprimer</button>
+                    </form>
+                {% endif %}
+
+                {% if user.is_superuser and claim.status == "SUBMITTED" %}
+                    <div class="rounded-md bg-amber-50 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 11.25c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-amber-800">Ancien dossier non verrouillé</h3>
+                                <div class="mt-2 text-sm text-amber-700">
+                                    <p>Le verrouillage et le lien patient sont désormais générés automatiquement à la soumission. Pour ce dossier (soumis avant ce changement), vous pouvez générer le lien manuellement.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="lock">
+                        <button type="submit" class="w-full mt-3 inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-500 transition-all"><i class="bi bi-lock"></i> Verrouiller et générer le lien (cas manuel)</button>
+                    </form>
+                {% endif %}
+
+                {% if claim.status == "LOCKED" %}
+                    <div class="rounded-md bg-green-50 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-green-800">En attente de validation patient</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Lien à envoyer au patient (toujours visible) -->
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-link-45deg text-brand-600"></i> Lien à envoyer au patient</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                {% if verify_url %}
+                <label for="verify-link" class="block text-sm font-medium leading-6 text-slate-900">Lien sécurisé</label>
+                <div class="mt-2 flex rounded-md shadow-sm">
+                    <div class="relative flex-grow focus-within:z-10">
+                        <input type="text" name="verify-link" id="verify-link" class="block w-full rounded-none rounded-l-md border-0 py-1.5 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm sm:leading-6 bg-slate-50" value="{{ verify_url }}" readonly>
+                    </div>
+                    <button type="button" onclick="copyVerifyLink()" class="relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-colors" id="copy-verify-btn" aria-live="polite">
+                        <svg class="-ml-0.5 h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M15.621 4.379a3 3 0 00-4.242 0l-7 7a3 3 0 004.241 4.243h.001l.497-.5a.75.75 0 011.064 1.057l-.498.501-.002.002a4.5 4.5 0 01-6.364-6.364l7-7a4.5 4.5 0 016.368 6.36l-3.455 3.553A2.625 2.625 0 119.52 9.52l3.45-3.451a.75.75 0 111.061 1.06l-3.45 3.451a1.125 1.125 0 001.587 1.595l3.454-3.553a3 3 0 000-4.242z" clip-rule="evenodd" />
+                        </svg>
+                        <span id="copy-btn-label">Copier</span>
+                    </button>
+                </div>
+                <p class="mt-2 text-xs text-slate-500">À envoyer au patient via SMS / WhatsApp pour qu’il consulte et valide le dossier.</p>
+                {% if claim.token_expires_at %}
+                <p class="mt-1 text-xs text-amber-600">Lien valide jusqu’au {{ claim.token_expires_at|date:"d/m/Y H:i" }}.</p>
+                {% endif %}
+                {% else %}
+                <div class="rounded-md bg-slate-50 p-4 border border-slate-100">
+                    <p class="text-sm text-slate-600">Le lien patient est généré <strong>automatiquement à la soumission</strong> du dossier par l’hôpital ou la pharmacie. Envoyez ce lien au patient (SMS / WhatsApp) pour qu’il vérifie et valide les montants.</p>
+                    <p class="mt-2 text-xs text-slate-500">Si le dossier vient d’être soumis, rechargez la page pour afficher le lien.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Historique des envois (email, SMS, WhatsApp) + Renvoyer -->
+        {% if verify_url %}
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl overflow-hidden">
+            <div class="px-4 py-4 sm:px-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <h3 class="text-base font-semibold leading-6 text-slate-900 flex items-center gap-2"><i class="bi bi-send-check text-brand-600"></i> Envois au patient</h3>
+                <form method="post" class="inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="resend_notification">
+                    <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-500">Renvoyer tout</button>
+                </form>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                {% if notification_logs %}
+                <ul role="list" class="divide-y divide-slate-100">
+                    {% for log in notification_logs %}
+                    <li class="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                        <div class="min-w-0 flex-1">
+                            <span class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-900">
+                                {% if log.channel == "EMAIL" %}<i class="bi bi-envelope text-slate-500"></i>{% elif log.channel == "SMS" %}<i class="bi bi-chat-dots text-slate-500"></i>{% else %}<i class="bi bi-whatsapp text-green-600"></i>{% endif %}
+                                {{ log.get_channel_display }} → {{ log.target }}
+                            </span>
+                            <span class="block text-xs text-slate-500 mt-0.5">{{ log.sent_at|date:"d/m/Y H:i" }}</span>
+                            {% if log.status == "FAILED" and log.error_message %}
+                            <p class="mt-1 text-xs text-red-600">{{ log.error_message|truncatewords:15 }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            {% if log.status == "SENT" %}
+                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">Envoyé</span>
+                            {% else %}
+                            <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">Échec</span>
+                            {% endif %}
+                            <form method="post" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="resend_notification">
+                                <input type="hidden" name="channel" value="{{ log.channel }}">
+                                <button type="submit" class="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50">Renvoyer</button>
+                            </form>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-sm text-slate-500">Aucun envoi enregistré. Les notifications sont envoyées à la soumission ou au verrouillage.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Toast "Lien copié" -->
+<div id="copy-toast" class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 rounded-xl bg-slate-800 text-white px-4 py-3 shadow-lg ring-1 ring-slate-700/50 opacity-0 pointer-events-none transition-all duration-300 translate-y-2" role="status" aria-live="polite">
+    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400"><i class="bi bi-check-lg text-lg"></i></span>
+    <span class="text-sm font-medium">Lien copié dans le presse-papiers</span>
+</div>
+<script>
+async function copyVerifyLink() {
+    var input = document.getElementById("verify-link");
+    var toast = document.getElementById("copy-toast");
+    var label = document.getElementById("copy-btn-label");
+    if (!input) return;
+    try {
+        await navigator.clipboard.writeText(input.value);
+    } catch (e) {
+        input.select();
+        document.execCommand("copy");
+    }
+    if (toast) {
+        toast.classList.remove("opacity-0", "pointer-events-none", "translate-y-2");
+        toast.classList.add("opacity-100");
+        if (label) label.textContent = "Copié !";
+        setTimeout(function() {
+            toast.classList.add("opacity-0", "pointer-events-none", "translate-y-2");
+            toast.classList.remove("opacity-100");
+            if (label) label.textContent = "Copier";
+        }, 2500);
+    }
+}
+</script>
+{% endblock %}

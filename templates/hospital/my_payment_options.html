@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Moyens de paiement — {{ hospital.name }} - REMEDY{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:tracking-tight">Moyens de paiement</h2>
+        <p class="mt-1 text-sm text-slate-500">{{ hospital.get_establishment_type_display }} : {{ hospital.name }}</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+        <a href="{% url 'provider_dashboard' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <p class="text-sm text-slate-600 mb-6">Cochez les moyens que votre établissement accepte et renseignez les infos (tél, IBAN, etc.). Les IPM les verront sur la fiche réclamation pour vous régler.</p>
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+        <div class="form-section">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Moyens de paiement acceptés</h3>
+            <div class="space-y-6">
+                {% for pm, option in payment_method_options %}
+                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <input type="checkbox" name="payment_{{ pm.id }}_used" value="1" id="pm_{{ pm.id }}_used" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" {% if option %}checked{% endif %}>
+                        <label for="pm_{{ pm.id }}_used" class="font-medium text-slate-900">{{ pm.name }}</label>
+                        <span class="text-xs text-slate-500">({{ pm.get_method_type_display }})</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-7">
+                        {% if pm.method_type == 'MOBILE_MONEY' %}
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">N° téléphone</label>
+                            <input type="text" name="payment_{{ pm.id }}_phone" value="{{ option.phone|default:'' }}" maxlength="30" placeholder="Ex: 221 77 123 45 67" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                        {% if pm.method_type == 'VIREMENT' %}
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">IBAN</label>
+                            <input type="text" name="payment_{{ pm.id }}_iban" value="{{ option.iban|default:'' }}" maxlength="40" placeholder="IBAN" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Banque</label>
+                            <input type="text" name="payment_{{ pm.id }}_bank_name" value="{{ option.bank_name|default:'' }}" maxlength="120" placeholder="Nom de la banque" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                        {% if pm.method_type == 'CHEQUE' %}
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">À l'ordre de</label>
+                            <input type="text" name="payment_{{ pm.id }}_payee_name" value="{{ option.payee_name|default:'' }}" maxlength="120" placeholder="Bénéficiaire du chèque" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                        {% if pm.method_type == 'ESPECES' or pm.method_type == 'CARTE' or pm.method_type == 'OTHER' %}
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Référence / précisions</label>
+                            <input type="text" name="payment_{{ pm.id }}_reference_notes" value="{{ option.reference_notes|default:'' }}" maxlength="255" placeholder="Infos utiles" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="pt-2 flex items-center gap-3">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">
+                <i class="bi bi-check2-circle"></i> Enregistrer
+            </button>
+            <a href="{% url 'provider_dashboard' %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

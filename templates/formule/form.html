@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - REMEDY{% endblock %}
+{% block content_form_errors %}
+{% if form.non_field_errors %}
+<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start gap-3">
+    <i class="bi bi-exclamation-circle-fill text-red-500 flex-shrink-0 mt-0.5"></i>
+    <ul class="list-none space-y-1">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:tracking-tight">{{ title }}</h2>
+        <p class="mt-1 text-sm text-slate-500">Définissez une formule de couverture pour une IPM</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+        <a href="{% url 'plan_list' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto">
+    <form method="post" class="form-section space-y-6">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {% if forced_ipm %}
+            {{ form.ipm }}
+            {% else %}
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">IPM</label>
+                <div class="flex flex-wrap items-start gap-2">
+                    <div class="min-w-[200px]">{{ form.ipm }}</div>
+                    {% include "includes/ipm_select_with_create.html" with select_id="id_ipm" %}
+                </div>
+                {% if form.ipm.errors %}<p class="text-sm text-red-600 mt-1">{{ form.ipm.errors.0 }}</p>{% endif %}
+            </div>
+            {% endif %}
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Nom de la formule</label>
+                {{ form.name }}
+                {% if form.name.errors %}<p class="text-sm text-red-600 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Plafond annuel (FCFA)</label>
+                {{ form.annual_ceiling }}
+                {% if form.annual_ceiling.errors %}<p class="text-sm text-red-600 mt-1">{{ form.annual_ceiling.errors.0 }}</p>{% endif %}
+                <p class="text-xs text-slate-500 mt-1">Laisser vide pour un plafond illimité.</p>
+            </div>
+            <div class="flex items-center gap-3 pt-8">
+                {{ form.is_active }}
+                <label class="text-sm font-medium text-slate-700" for="{{ form.is_active.id_for_label }}">Formule active</label>
+            </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 p-4 sm:p-5">
+            <h3 class="text-sm font-semibold text-slate-900 mb-1">Règles de couverture initiales</h3>
+            <p class="text-xs text-slate-500 mb-4">
+                Cochez les catégories incluses dans cette formule puis définissez leur pourcentage.
+            </p>
+            <div class="mb-4 rounded-lg border border-brand-100 bg-brand-50/40 p-3">
+                <div class="flex flex-wrap items-end gap-3">
+                    <div>
+                        <label for="bulk-percent" class="block text-xs font-semibold text-brand-900 mb-1">Appliquer un pourcentage à toutes les catégories</label>
+                        <div class="relative">
+                            <input
+                                type="number"
+                                id="bulk-percent"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                placeholder="Ex: 80"
+                                class="block w-40 rounded-lg border border-brand-200 bg-white py-2 pl-3 pr-9 text-sm text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                            >
+                            <span class="absolute inset-y-0 right-3 flex items-center text-xs text-slate-500">%</span>
+                        </div>
+                    </div>
+                    <button
+                        type="button"
+                        onclick="applyBulkPercent()"
+                        class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-3.5 py-2 text-sm font-semibold text-white hover:bg-brand-500"
+                    >
+                        <i class="bi bi-magic"></i> Appliquer à tous
+                    </button>
+                </div>
+                <p class="mt-2 text-xs text-slate-600">
+                    Cette action coche toutes les catégories et remplit le même %.
+                    Vous pouvez ensuite ajuster les exceptions une par une.
+                </p>
+            </div>
+            <div class="space-y-2">
+                {% for row in category_rows %}
+                <div class="grid grid-cols-12 items-center gap-3 rounded-lg border border-slate-100 px-3 py-2.5">
+                    <div class="col-span-7 sm:col-span-8 flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            id="cat_enabled_{{ row.id }}"
+                            name="cat_enabled_{{ row.id }}"
+                            class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                            {% if row.enabled %}checked{% endif %}
+                            onchange="togglePlanPercent('{{ row.id }}')"
+                        >
+                        <label for="cat_enabled_{{ row.id }}" class="text-sm font-medium text-slate-800">
+                            {{ row.name }}
+                        </label>
+                        {% if row.is_pharmacy %}
+                            <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">Médicament</span>
+                        {% else %}
+                            <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">Service</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-span-5 sm:col-span-4">
+                        <div class="relative">
+                            <input
+                                type="number"
+                                id="cat_percent_{{ row.id }}"
+                                name="cat_percent_{{ row.id }}"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                value="{{ row.percent }}"
+                                placeholder="0-100"
+                                class="block w-full rounded-lg border border-slate-300 py-2 pl-3 pr-10 text-sm text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                                {% if not row.enabled %}disabled{% endif %}
+                            >
+                            <span class="absolute inset-y-0 right-3 flex items-center text-xs text-slate-500">%</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-sm text-slate-500">Aucune catégorie active disponible.</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="pt-2 flex items-center gap-3">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">
+                <i class="bi bi-check2-circle"></i> Enregistrer
+            </button>
+            <a href="{% url 'plan_list' %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</a>
+        </div>
+    </form>
+</div>
+<script>
+function togglePlanPercent(categoryId) {
+    const cb = document.getElementById('cat_enabled_' + categoryId);
+    const input = document.getElementById('cat_percent_' + categoryId);
+    if (!cb || !input) return;
+    input.disabled = !cb.checked;
+    if (!cb.checked) input.value = '';
+}
+
+function applyBulkPercent() {
+    const bulk = document.getElementById('bulk-percent');
+    if (!bulk) return;
+    const raw = (bulk.value || '').trim();
+    if (!raw) {
+        alert("Saisissez d'abord un pourcentage à appliquer.");
+        bulk.focus();
+        return;
+    }
+    const value = Number(raw);
+    if (Number.isNaN(value) || value < 0 || value > 100) {
+        alert('Le pourcentage global doit être entre 0 et 100.');
+        bulk.focus();
+        return;
+    }
+    const normalized = String(value);
+    const checkboxes = document.querySelectorAll('input[id^="cat_enabled_"]');
+    checkboxes.forEach((cb) => {
+        cb.checked = true;
+        const categoryId = cb.id.replace('cat_enabled_', '');
+        const input = document.getElementById('cat_percent_' + categoryId);
+        if (input) {
+            input.disabled = false;
+            input.value = normalized;
+        }
+    });
+}
+</script>
+{% endblock %}

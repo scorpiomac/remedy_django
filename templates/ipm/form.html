@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - REMEDY{% endblock %}
+{% block content_form_errors %}
+{% if form.non_field_errors %}
+<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start gap-3">
+    <i class="bi bi-exclamation-circle-fill text-red-500 flex-shrink-0 mt-0.5"></i>
+    <ul class="list-none space-y-1">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:tracking-tight">{{ title }}</h2>
+        <p class="mt-1 text-sm text-slate-500">Configuration d'un organisme IPM (Institution de Prévoyance Maladie)</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+        <a href="{% if is_own_ipm %}{% url 'claim_list' %}{% else %}{% url 'ipm_list' %}{% endif %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="max-w-2xl mx-auto space-y-8">
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+        {% if not is_own_ipm %}
+        <div class="form-section">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Identification</h3>
+            <div class="grid grid-cols-1 gap-6">
+                <div class="w-full">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<p class="text-sm text-red-600 mt-1">{{ form.name.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="w-full">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Code (généré depuis le nom, modifiable)</label>
+                    {{ form.code }}
+                    {% if form.code.help_text %}<p class="text-xs text-slate-500 mt-1">{{ form.code.help_text }}</p>{% endif %}
+                    {% if form.code.errors %}<p class="text-sm text-red-600 mt-1">{{ form.code.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Coordonnées</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.address.label }}</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}<p class="text-sm text-red-600 mt-1">{{ form.address.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.city.label }}</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<p class="text-sm text-red-600 mt-1">{{ form.city.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.phone.label }}</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}<p class="text-sm text-red-600 mt-1">{{ form.phone.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<p class="text-sm text-red-600 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Statut</h3>
+            <div class="flex items-center gap-3">
+                {{ form.is_active }}
+                <label class="text-sm font-medium text-slate-700" for="{{ form.is_active.id_for_label }}">{{ form.is_active.label }}</label>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if ipm and payment_method_options %}
+        <div class="form-section">
+            <h3 class="text-base font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4">Moyens de paiement acceptés</h3>
+            <p class="text-sm text-slate-500 mb-4">Cochez les moyens acceptés et renseignez les infos demandées (tél, IBAN, etc.).</p>
+            <div class="space-y-6">
+                {% for pm, option in payment_method_options %}
+                <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <input type="checkbox" name="payment_{{ pm.id }}_used" value="1" id="pm_{{ pm.id }}_used" class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" {% if option %}checked{% endif %}>
+                        <label for="pm_{{ pm.id }}_used" class="font-medium text-slate-900">{{ pm.name }}</label>
+                        <span class="text-xs text-slate-500">({{ pm.get_method_type_display }})</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-7">
+                        {% if pm.method_type == 'MOBILE_MONEY' %}
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">N° téléphone</label>
+                            <input type="text" name="payment_{{ pm.id }}_phone" value="{{ option.phone|default:'' }}" maxlength="30" placeholder="Ex: 221 77 123 45 67" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                        {% if pm.method_type == 'VIREMENT' %}
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">IBAN</label>
+                            <input type="text" name="payment_{{ pm.id }}_iban" value="{{ option.iban|default:'' }}" maxlength="40" placeholder="IBAN" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Banque</label>
+                            <input type="text" name="payment_{{ pm.id }}_bank_name" value="{{ option.bank_name|default:'' }}" maxlength="120" placeholder="Nom de la banque" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                        {% if pm.method_type == 'CHEQUE' %}
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">À l'ordre de</label>
+                            <input type="text" name="payment_{{ pm.id }}_payee_name" value="{{ option.payee_name|default:'' }}" maxlength="120" placeholder="Bénéficiaire du chèque" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                        {% if pm.method_type == 'ESPECES' or pm.method_type == 'CARTE' or pm.method_type == 'OTHER' %}
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Référence / précisions</label>
+                            <input type="text" name="payment_{{ pm.id }}_reference_notes" value="{{ option.reference_notes|default:'' }}" maxlength="255" placeholder="Infos utiles" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-slate-900 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="pt-2 flex items-center gap-3">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">
+                <i class="bi bi-check2-circle"></i> Enregistrer
+            </button>
+            <a href="{% if is_own_ipm %}{% url 'claim_list' %}{% else %}{% url 'ipm_list' %}{% endif %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<script>
+(function() {
+    var nameEl = document.getElementById('id_name');
+    var codeEl = document.getElementById('id_code');
+    if (!nameEl || !codeEl) return;
+
+    function normalizeForCode(s) {
+        if (!s || typeof s !== 'string') return '';
+        var map = {'à':'a','á':'a','â':'a','ã':'a','ä':'a','å':'a','æ':'ae','ç':'c','è':'e','é':'e','ê':'e','ë':'e','ì':'i','í':'i','î':'i','ï':'i','ñ':'n','ò':'o','ó':'o','ô':'o','õ':'o','ö':'o','ù':'u','ú':'u','û':'u','ü':'u','ý':'y','ÿ':'y','œ':'oe'};
+        var r = s.trim().toLowerCase();
+        for (var k in map) r = r.split(k).join(map[k]);
+        r = r.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').replace(/_+/g, '_');
+        return r.toUpperCase().substring(0, 30);
+    }
+
+    nameEl.addEventListener('input', function() {
+        codeEl.value = normalizeForCode(nameEl.value);
+    });
+})();
+</script>
+{% endblock %}

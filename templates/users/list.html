@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Utilisateurs - REMEDY{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Gestion des Utilisateurs</h2>
+        <p class="mt-1 text-sm text-slate-500">Comptes, rôles et activation</p>
+    </div>
+    <div class="mt-4 flex md:ml-4 md:mt-0">
+        <a href="{% url 'user_create' %}" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">
+            <i class="bi bi-person-add"></i> Nouvel utilisateur
+        </a>
+    </div>
+</div>
+
+<div class="bg-white shadow-sm ring-1 ring-slate-900/5 rounded-2xl mb-6">
+    <div class="p-4 sm:p-6">
+        <form method="get" class="flex flex-col sm:flex-row gap-3 items-end">
+            <div class="w-full sm:flex-1">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Recherche</label>
+                <input type="text" name="q" value="{{ query }}" placeholder="username ou email..." class="block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 shadow-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm">
+            </div>
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500">
+                <i class="bi bi-search"></i> Rechercher
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="bg-white shadow-sm ring-1 ring-slate-900/5 rounded-2xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nom</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Rôle</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">IPM / Établissement</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for u in users %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ u.username }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-700">{{ u.email|default:"—" }}</td>
+                    <td class="px-6 py-4 text-sm">
+                        {% if u.staff_profile %}
+                            <span class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">{{ u.staff_profile.get_role_display }}</span>
+                        {% else %}
+                            <span class="text-slate-500">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-700">
+                        {% if u.staff_profile %}
+                            {% if u.staff_profile.role == 'IPM_ADMIN' %}{{ u.staff_profile.get_ipm_display_name }}{% elif u.staff_profile.hospital %}{{ u.staff_profile.hospital.get_establishment_type_display }} : {{ u.staff_profile.hospital.name }}{% else %}—{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                        {% if u.is_active %}
+                            <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">Actif</span>
+                        {% else %}
+                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{% url 'user_edit' u.id %}" class="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                            <i class="bi bi-pencil-square"></i> Modifier
+                        </a>
+                        {% if u.id != request.user.id %}
+                        <form method="post" action="{% url 'user_delete' u.id %}" class="inline ml-2" onsubmit="return confirm('Supprimer cet utilisateur (suppression logique) ?');">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex items-center gap-1 rounded-lg bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-500">Aucun utilisateur trouvé.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

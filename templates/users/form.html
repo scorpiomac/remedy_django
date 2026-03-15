@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - REMEDY{% endblock %}
+{% block content_form_errors %}
+{% if form.non_field_errors %}
+<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start gap-3">
+    <i class="bi bi-exclamation-circle-fill text-red-500 flex-shrink-0 mt-0.5"></i>
+    <ul class="list-none space-y-1">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:tracking-tight">{{ title }}</h2>
+        <p class="mt-1 text-sm text-slate-500">Configuration de compte utilisateur</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+        <a href="{% if is_self_edit %}{% url 'claim_list' %}{% else %}{% url 'user_list' %}{% endif %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto">
+    <form method="post" class="form-section space-y-6">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}<p class="text-sm text-red-600 mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<p class="text-sm text-red-600 mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+            </div>
+            {% if is_self_edit %}
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.current_password.label }}</label>
+                {{ form.current_password }}
+                {% if form.current_password.errors %}<p class="text-sm text-red-600 mt-1">{{ form.current_password.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.new_password.label }}</label>
+                {{ form.new_password }}
+                {% if form.new_password.errors %}<p class="text-sm text-red-600 mt-1">{{ form.new_password.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-2">{{ form.new_password_confirm.label }}</label>
+                {{ form.new_password_confirm }}
+                {% if form.new_password_confirm.errors %}<p class="text-sm text-red-600 mt-1">{{ form.new_password_confirm.errors.0 }}</p>{% endif %}
+            </div>
+            {% endif %}
+            {% if not is_self_edit %}
+            <div class="sm:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-2">Mot de passe</label>
+                {{ form.password }}
+                {% if form.password.errors %}<p class="text-sm text-red-600 mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+            </div>
+            {% endif %}
+            {% if not is_self_edit %}
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Rôle</label>
+                {{ form.role }}
+                {% if form.role.errors %}<p class="text-sm text-red-600 mt-1">{{ form.role.errors.0 }}</p>{% endif %}
+            </div>
+            <div id="user-role-block-ipm" class="sm:col-span-2" data-role-block="IPM_ADMIN" style="display:none">
+                <label class="block text-sm font-medium text-slate-700 mb-2">IPM</label>
+                <div class="flex flex-wrap items-start gap-2">
+                    <div class="min-w-[200px]">{{ form.ipm }}</div>
+                    {% include "includes/ipm_select_with_create.html" with select_id="id_ipm" %}
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Assurance / organisme payeur dont cet utilisateur gère les dossiers.</p>
+                {% if form.ipm.errors %}<p class="text-sm text-red-600 mt-1">{{ form.ipm.errors.0 }}</p>{% endif %}
+            </div>
+            <div id="user-role-block-establishment" class="sm:col-span-2" data-role-block="DOCTOR,PHARMACY" style="display:none">
+                <label id="user-role-establishment-label" class="block text-sm font-medium text-slate-700 mb-2">Hôpital</label>
+                <div class="flex flex-wrap items-start gap-2">
+                    <div class="min-w-[200px]">{{ form.hospital }}</div>
+                    {% include "includes/hospital_select_with_create.html" with select_id="id_hospital" %}
+                </div>
+                <p id="user-role-establishment-help" class="text-xs text-slate-500 mt-1">Hôpital ou clinique affiché sur la page de validation patient. Créez l’établissement dans Hôpitaux / Pharmacies si besoin.</p>
+                {% if form.hospital.errors %}<p class="text-sm text-red-600 mt-1">{{ form.hospital.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="sm:col-span-2 flex items-center gap-3">
+                {{ form.is_active }}
+                <label class="text-sm font-medium text-slate-700" for="{{ form.is_active.id_for_label }}">Compte actif</label>
+            </div>
+            {% endif %}
+        </div>
+        <div class="pt-2 flex items-center gap-3">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">
+                <i class="bi bi-check2-circle"></i> Enregistrer
+            </button>
+            <a href="{% if is_self_edit %}{% url 'claim_list' %}{% else %}{% url 'user_list' %}{% endif %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</a>
+        </div>
+    </form>
+</div>
+
+{% if not is_self_edit %}
+<script>
+(function() {
+    var roleSelect = document.getElementById('id_role');
+    if (!roleSelect) return;
+    var blockIpm = document.getElementById('user-role-block-ipm');
+    var blockEstablishment = document.getElementById('user-role-block-establishment');
+    var labelEstablishment = document.getElementById('user-role-establishment-label');
+    var helpEstablishment = document.getElementById('user-role-establishment-help');
+    if (!blockIpm || !blockEstablishment || !labelEstablishment || !helpEstablishment) return;
+
+    var helpTexts = {
+        DOCTOR: 'Hôpital ou clinique affiché sur la page de validation patient. Créez l\'établissement dans Hôpitaux / Pharmacies si besoin.',
+        PHARMACY: 'Pharmacie affichée sur la page de validation patient. Créez l\'établissement dans Hôpitaux / Pharmacies si besoin.'
+    };
+
+    function updateRoleBlocks() {
+        var role = roleSelect.value;
+        blockIpm.style.display = role === 'IPM_ADMIN' ? 'block' : 'none';
+        var showEstablishment = role === 'DOCTOR' || role === 'PHARMACY';
+        blockEstablishment.style.display = showEstablishment ? 'block' : 'none';
+        if (role === 'DOCTOR') {
+            labelEstablishment.textContent = 'Hôpital';
+            helpEstablishment.textContent = helpTexts.DOCTOR;
+        } else if (role === 'PHARMACY') {
+            labelEstablishment.textContent = 'Pharmacie';
+            helpEstablishment.textContent = helpTexts.PHARMACY;
+        }
+    }
+
+    roleSelect.addEventListener('change', updateRoleBlocks);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateRoleBlocks);
+    } else {
+        updateRoleBlocks();
+    }
+})();
+</script>
+{% endif %}
+{% endblock %}

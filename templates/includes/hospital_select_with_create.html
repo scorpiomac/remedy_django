@@ -1,0 +1,7 @@
+{% comment %}
+  Usage: {% include "includes/hospital_select_with_create.html" with select_id="id_hospital" %}
+  Ouvre le modal de création rapide et met à jour le select cible avec le nouvel établissement.
+{% endcomment %}
+<button type="button" class="hospital-create-trigger mt-2 inline-flex items-center gap-1.5 rounded-lg border border-brand-300 bg-white px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-50 transition-colors" data-select-id="{{ select_id|default:'id_hospital' }}">
+    <i class="bi bi-plus-circle text-brand-600"></i> Créer un établissement
+</button>

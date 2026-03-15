@@ -1,0 +1,785 @@
+{% load static %}
+{% load remedy_urls %}
+<!doctype html>
+<html lang="fr" class="h-full bg-slate-50 antialiased">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}REMEDY{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16.png' %}">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (CDN for V1 speed) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tom Select (Searchable) -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <!-- Bootstrap Icons (inspiration PHP, design moderne) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    
+    <!-- Custom Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        },
+                        slate: {
+                            850: '#1e293b', // Custom darker slate
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 1px 3px rgba(0,0,0,0.08)',
+                        'card-hover': '0 8px 25px rgba(0,0,0,0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Tom Select Override for Tailwind */
+        .ts-control {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 0.5rem !important;
+            padding: 0.625rem 1rem !important;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+        }
+        .ts-control.focus {
+            border-color: #0ea5e9 !important;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+        }
+        .ts-dropdown {
+            border-radius: 0.5rem !important;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1) !important;
+            z-index: 9999 !important;
+        }
+        
+        /* Form sections (inspiration PHP) */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            transition: box-shadow 0.2s;
+        }
+        .form-section:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+        .form-section h3 { color: #0284c7; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.75rem; margin-bottom: 1rem; }
+        .amount-display { background: #f8fafc; border-radius: 12px; padding: 1.25rem; text-align: center; border: 2px solid #e2e8f0; }
+        .amount-display .amount { font-size: 1.5rem; font-weight: 700; }
+        .upload-zone { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 2rem; text-center; cursor: pointer; transition: all 0.2s; }
+        .upload-zone:hover, .upload-zone.dragover { border-color: #0284c7; background: rgba(2,132,199,0.05); }
+        .audit-timeline { position: relative; padding-left: 2rem; }
+        .audit-timeline::before { content: ''; position: absolute; left: 0.75rem; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
+        .audit-timeline .timeline-item { position: relative; padding-bottom: 1rem; }
+        .audit-timeline .timeline-item::before { content: ''; position: absolute; left: -1.5rem; top: 0.35rem; width: 10px; height: 10px; border-radius: 50%; background: #0284c7; border: 2px solid white; box-shadow: 0 0 0 2px #0284c7; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        [x-cloak] { display: none !important; }
+
+        /* Tabulator — Design moderne REMEDY */
+        .tabulator {
+            font-size: 0.875rem;
+            background: #fff !important;
+            border: none !important;
+        }
+        .tabulator-tableholder { border-radius: 0; overflow: hidden; }
+        .tabulator-header {
+            background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 100%) !important;
+            border: none !important;
+            box-shadow: 0 2px 4px rgba(2,132,199,0.15) !important;
+        }
+        .tabulator-header .tabulator-col {
+            background: transparent !important;
+            font-weight: 600 !important;
+            color: #fff !important;
+            font-size: 0.7rem !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.06em !important;
+            padding: 1rem 1.25rem !important;
+            border-right: 1px solid rgba(255,255,255,0.15) !important;
+        }
+        .tabulator-header .tabulator-col:last-child { border-right: none !important; }
+        .tabulator-header .tabulator-col.tabulator-sortable:hover {
+            background: rgba(255,255,255,0.12) !important;
+        }
+        .tabulator-header .tabulator-col .tabulator-col-sorter {
+            color: rgba(255,255,255,0.7) !important;
+        }
+        .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="asc"] .tabulator-col-sorter,
+        .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="desc"] .tabulator-col-sorter {
+            color: #fff !important;
+        }
+        .tabulator .tabulator-row {
+            background: #fff !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            transition: all 0.2s ease !important;
+        }
+        .tabulator .tabulator-row.tabulator-row-even { background: #fafbfc !important; }
+        .tabulator .tabulator-row:hover {
+            background: #f0f9ff !important;
+            box-shadow: 0 1px 3px rgba(2,132,199,0.12) !important;
+            z-index: 1;
+        }
+        .tabulator .tabulator-cell {
+            border: none !important;
+            padding: 1rem 1.25rem !important;
+            border-right: 1px solid #f1f5f9 !important;
+            vertical-align: middle !important;
+        }
+        .tabulator .tabulator-row .tabulator-cell:last-child { border-right: none !important; }
+        .tabulator-row.tabulator-selected { background: #f0f9ff !important; }
+        .tabulator .tab-montant { font-weight: 600; color: #0f172a; }
+        /* Badges statut modernes */
+        .tabulator .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        /* Pagination moderne */
+        .tabulator .tabulator-footer {
+            background: #fff !important;
+            border: none !important;
+            padding: 1rem 1.25rem !important;
+            border-radius: 0 0 16px 16px !important;
+            box-shadow: none !important;
+        }
+        .tabulator .tabulator-page {
+            min-width: 2rem;
+            height: 2rem;
+            padding: 0 0.5rem;
+            margin: 0 0.15rem;
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            background: #fff !important;
+            color: #475569 !important;
+            font-weight: 500 !important;
+            transition: all 0.15s ease !important;
+        }
+        .tabulator .tabulator-page:hover {
+            background: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        .tabulator .tabulator-page.active {
+            background: linear-gradient(135deg, #0284c7, #0ea5e9) !important;
+            border-color: #0284c7 !important;
+            color: #fff !important;
+        }
+        .tabulator .tabulator-paginator {
+            gap: 0.5rem;
+        }
+        .tabulator .tabulator-page-size {
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 0.35rem 0.75rem !important;
+            font-size: 0.8125rem !important;
+        }
+        /* Lien action Ouvrir */
+        .tabulator .tabulator-cell .table-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.8125rem;
+            color: #0284c7 !important;
+            background: rgba(2,132,199,0.08);
+            transition: all 0.15s ease;
+            text-decoration: none !important;
+        }
+        .tabulator .tabulator-cell .table-action-btn:hover {
+            background: rgba(2,132,199,0.15) !important;
+            color: #0369a1 !important;
+        }
+        /* Container table avec ombre */
+        .tabulator-modern-wrap {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Mot de passe : œil afficher / masquer */
+        .password-toggle-wrapper {
+            position: relative;
+        }
+        .password-toggle-wrapper input {
+            padding-right: 2.75rem !important;
+        }
+        .password-toggle-btn {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0.25rem 0.5rem;
+            border: none;
+            background: none;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 0.375rem;
+        }
+        .password-toggle-btn:hover {
+            color: #0ea5e9;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full flex flex-col">
+
+{% if user.is_authenticated and request.resolver_match.url_name != 'patient_verify' and request.resolver_match.url_name != 'patient_verify_public' %}
+<div class="flex min-h-screen">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-slate-200 fixed inset-y-0 left-0 z-50 flex flex-col transition-transform duration-300 transform lg:translate-x-0 -translate-x-full lg:static">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-100">
+            <img src="{% static 'img/remedi-logo-banner.png' %}" alt="Remedi" class="h-9 w-auto">
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+            <div class="px-3 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Principal
+            </div>
+            
+            {% url 'superadmin_dashboard' as superadmin_url %}
+            {% url 'ipm_dashboard' as ipm_url %}
+            {% url 'provider_dashboard' as provider_url %}
+            
+            {% if user.is_superuser %}
+                <a href="{{ superadmin_url }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if request.path == superadmin_url %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                    <svg class="mr-3 h-5 w-5 {% if request.path == superadmin_url %}text-brand-500{% else %}text-slate-400 group-hover:text-slate-500{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                    Dashboard
+                </a>
+            {% elif remedy_user_role == "IPM_ADMIN" %}
+                <a href="{{ ipm_url }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if request.path == ipm_url %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                    Dashboard
+                </a>
+            {% else %}
+                <a href="{{ provider_url }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if request.path == provider_url %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                    Dashboard
+                </a>
+            {% endif %}
+
+            <div class="px-3 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Dossiers
+            </div>
+            <a href="{% url 'claim_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if request.resolver_match.url_name == 'claim_list' or request.resolver_match.url_name == 'claim_create' or request.resolver_match.url_name == 'claim_edit' or request.resolver_match.url_name == 'claim_detail' or request.resolver_match.url_name == 'claim_delete' %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 {% if request.resolver_match.url_name == 'claim_list' or request.resolver_match.url_name == 'claim_create' or request.resolver_match.url_name == 'claim_edit' or request.resolver_match.url_name == 'claim_detail' or request.resolver_match.url_name == 'claim_delete' %}text-brand-500{% else %}text-slate-400 group-hover:text-slate-500{% endif %}" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Dossiers (Claims)
+            </a>
+
+            {% comment %} Masqué pour le moment : Mon IPM dans la sidebar {% endcomment %}
+            {% if False and remedy_user_role == 'IPM_ADMIN' and remedy_my_ipm and not user.is_superuser %}
+            <div class="px-3 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Mon organisation
+            </div>
+            <a href="{% url 'ipm_edit' remedy_my_ipm.id %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if request.resolver_match.url_name == 'ipm_edit' %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                Mon IPM
+            </a>
+            {% endif %}
+
+            {% if remedy_user_role == 'DOCTOR' or remedy_user_role == 'PHARMACY' %}
+            {% if remedy_my_hospital %}
+            <div class="px-3 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Mon établissement
+            </div>
+            <a href="{% url 'my_establishment_payment_options' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if request.resolver_match.url_name == 'my_establishment_payment_options' %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                Moyens de paiement
+            </a>
+            {% endif %}
+            {% endif %}
+
+            {% if user.is_superuser or remedy_user_role == "IPM_ADMIN" %}
+            <div class="px-3 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Assurés & couverture
+            </div>
+            <a href="{% url 'patient_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/patients/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                Patients
+            </a>
+            <a href="{% url 'plan_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/formules/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                Formules
+            </a>
+            <a href="{% url 'coverage_rule_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/coverage-rules/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6m3 6V7m3 10v-4m5 8H4a1 1 0 01-1-1V4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1z" /></svg>
+                Couverture
+            </a>
+            {% endif %}
+
+            {% if user.is_superuser %}
+            <div class="px-3 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Référentiel
+            </div>
+            <a href="{% url 'ipm_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/ipms/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18M5 21V7l8-4 6 4v14M9 9h.01M9 12h.01M9 15h.01M13 9h.01M13 12h.01M13 15h.01" /></svg>
+                IPMs
+            </a>
+            <a href="{% url 'hospital_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/hospitals/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                Hôpitaux / Pharmacies
+            </a>
+            <a href="{% url 'category_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/categories/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 12h7m-7 5h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" /></svg>
+                Catégories
+            </a>
+            <a href="{% url 'payment_method_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/payment-methods/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                Moyens de paiement
+            </a>
+
+            <div class="px-3 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Administration
+            </div>
+            <a href="{% url 'user_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/users/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A9 9 0 1118.88 6.196 9 9 0 015.12 17.804zM15 19a4 4 0 10-8 0" /></svg>
+                Utilisateurs
+            </a>
+            <a href="{% url 'notification_list' %}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/claims/notifications/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                Notifications
+            </a>
+
+            {% remedy_url 'superadmin_testimonial_list' as superadmin_avis_url %}
+            {% remedy_url 'superadmin_demo_notification_config' as superadmin_mails_url %}
+            {% remedy_url 'superadmin_demo_request_list' as superadmin_demandes_url %}
+            {% remedy_url 'superadmin_email_log_list' as superadmin_emails_url %}
+            {% if superadmin_avis_url or superadmin_mails_url or superadmin_demandes_url or superadmin_emails_url %}
+            <div class="px-3 mt-8 mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                Site Remedi
+            </div>
+            {% if superadmin_demandes_url %}
+            <a href="{{ superadmin_demandes_url }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/superadmin/demandes-demo/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                Demandes de démo
+            </a>
+            {% endif %}
+            {% if superadmin_avis_url %}
+            <a href="{{ superadmin_avis_url }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/superadmin/avis/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                Avis (témoignages)
+            </a>
+            {% endif %}
+            {% if superadmin_mails_url %}
+            <a href="{{ superadmin_mails_url }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/superadmin/mails-demandes/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                Qui reçoit les mails (démo)
+            </a>
+            {% endif %}
+            {% if superadmin_emails_url %}
+            <a href="{{ superadmin_emails_url }}" class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {% if '/superadmin/emails/' in request.path %}bg-brand-50 text-brand-600{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900{% endif %}">
+                <svg class="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                Logs des emails
+            </a>
+            {% endif %}
+            {% endif %}
+            {% endif %}
+        </nav>
+
+        <!-- User Profile (tous : au moins changer MDP via Mon profil) -->
+        <div class="border-t border-slate-200 p-4">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="h-9 w-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-bold text-sm">
+                        {{ user.username|make_list|first|upper }}
+                    </div>
+                </div>
+                <div class="ml-3 flex-1 min-w-0">
+                    <a href="{% url 'user_edit' user.id %}" class="block truncate text-sm font-medium text-slate-900 hover:text-brand-600">{{ user.username }}</a>
+                    <p class="text-xs text-slate-500 truncate">
+                        {% if user.is_superuser %}Admin{% else %}{{ remedy_user_role_label|default:"User" }}{% endif %}
+                    </p>
+                </div>
+                <form action="{% url 'logout' %}" method="post" class="flex items-center gap-1">
+                    {% csrf_token %}
+                    <a href="{% url 'user_edit' user.id %}" class="p-1.5 text-slate-400 hover:text-slate-600" title="Mon profil"><svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></a>
+                    <button type="submit" class="p-1.5 text-slate-400 hover:text-slate-600" title="Déconnexion">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+        <div class="flex-1 overflow-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Zone messages Django (success, error, warning) -->
+                <div id="django-messages-zone" class="mb-6 space-y-2" aria-live="polite">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="rounded-xl border p-4 flex items-start gap-3 {% if 'error' in message.tags %}bg-red-50 border-red-200 text-red-800{% elif 'success' in message.tags %}bg-emerald-50 border-emerald-200 text-emerald-800{% elif 'warning' in message.tags %}bg-amber-50 border-amber-200 text-amber-800{% else %}bg-slate-50 border-slate-200 text-slate-800{% endif %}">
+                                <span class="flex-shrink-0 mt-0.5" aria-hidden="true">
+                                    {% if 'error' in message.tags %}<i class="bi bi-exclamation-circle-fill text-red-500"></i>
+                                    {% elif 'success' in message.tags %}<i class="bi bi-check-circle-fill text-emerald-500"></i>
+                                    {% elif 'warning' in message.tags %}<i class="bi bi-exclamation-triangle-fill text-amber-500"></i>
+                                    {% else %}<i class="bi bi-info-circle-fill text-slate-500"></i>{% endif %}
+                                </span>
+                                <p class="text-sm font-medium flex-1">{{ message }}</p>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <!-- Zone erreurs globales de formulaire (non_field_errors) -->
+                {% block content_form_errors %}{% endblock %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </main>
+</div>
+
+{% else %}
+    <!-- Public Layout -->
+    <div class="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 {% block public_bg %}bg-slate-50{% endblock %}">
+        {% block content_public %}{% endblock %}
+    </div>
+{% endif %}
+
+{% block extra_js %}{% endblock %}
+
+<!-- Désactivation des boutons Enregistrer au submit (évite double clic / spam) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var spinnerSvg = '<svg class="animate-spin -ml-1 mr-2 h-5 w-5 inline-block text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+    document.addEventListener('submit', function(e) {
+        var form = e.target;
+        if (form.tagName !== 'FORM' || form.id === 'ipm-create-ajax-form-global' || form.id === 'hospital-create-ajax-form-global' || form.id === 'patient-verify-form') return;
+        var buttons = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+        buttons.forEach(function(btn) {
+            if (btn.disabled) return;
+            btn.disabled = true;
+            if (btn.tagName === 'BUTTON' && !btn.dataset.submitLoading) {
+                btn.dataset.submitLoading = '1';
+                btn.dataset.originalContent = btn.innerHTML;
+                btn.innerHTML = spinnerSvg + ' <span>Enregistrement...</span>';
+            } else if (btn.tagName === 'INPUT') {
+                btn.dataset.originalValue = btn.value;
+                btn.value = 'Enregistrement...';
+            }
+        });
+    }, true);
+});
+</script>
+
+<!-- Modal global : création IPM rapide (hors formulaire pour éviter soumission) -->
+<div id="ipm-create-modal-global" class="fixed inset-0 z-50 hidden" aria-modal="true" role="dialog" aria-labelledby="ipm-create-modal-title">
+    <div class="fixed inset-0 bg-slate-900/60" data-ipm-modal-close></div>
+    <div class="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl">
+        <h3 id="ipm-create-modal-title" class="text-lg font-semibold text-slate-900 mb-4">Nouvelle IPM (création rapide)</h3>
+        <p class="text-xs text-slate-500 mb-4">Complétez la fiche (adresse, contact…) depuis la liste IPMs après enregistrement.</p>
+        <form id="ipm-create-ajax-form-global" class="space-y-4">
+            <div>
+                <label for="ipm-create-name-global" class="block text-sm font-medium text-slate-700 mb-1">Raison sociale / Nom <span class="text-red-500">*</span></label>
+                <input type="text" id="ipm-create-name-global" name="name" required maxlength="120" placeholder="Ex: Santeplus" class="block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="ipm-create-code-global" class="block text-sm font-medium text-slate-700 mb-1">Code (optionnel)</label>
+                <input type="text" id="ipm-create-code-global" name="code" maxlength="30" placeholder="Ex: SANTEPLUS" class="block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm">
+            </div>
+            <p id="ipm-create-error-global" class="text-sm text-red-600 hidden"></p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" data-ipm-modal-close class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</button>
+                <button type="submit" class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500">Créer</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+(function() {
+    var modal = document.getElementById('ipm-create-modal-global');
+    var form = document.getElementById('ipm-create-ajax-form-global');
+    if (!modal || !form) return;
+    var nameInput = document.getElementById('ipm-create-name-global');
+    var codeInput = document.getElementById('ipm-create-code-global');
+    var errorEl = document.getElementById('ipm-create-error-global');
+    var currentSelectId = null;
+    var currentValueType = 'id';
+    var ajaxUrl = "{% url 'ipm_create_ajax' %}";
+
+    function getCsrf() {
+        var el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        return el ? el.value : '';
+    }
+    function showModal(selectId, valueType) {
+        currentSelectId = selectId || null;
+        currentValueType = (valueType || 'id');
+        errorEl.classList.add('hidden');
+        errorEl.textContent = '';
+        if (nameInput) nameInput.value = '';
+        if (codeInput) codeInput.value = '';
+        modal.classList.remove('hidden');
+        if (nameInput) nameInput.focus();
+    }
+    function hideModal() {
+        modal.classList.add('hidden');
+    }
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.ipm-create-trigger');
+        if (!btn) return;
+        e.preventDefault();
+        showModal(btn.getAttribute('data-select-id'), btn.getAttribute('data-value-type'));
+    });
+    modal.querySelectorAll('[data-ipm-modal-close]').forEach(function(el) {
+        el.addEventListener('click', hideModal);
+    });
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        errorEl.classList.add('hidden');
+        var name = (nameInput && nameInput.value || '').trim();
+        if (!name) {
+            errorEl.textContent = 'Le nom est requis.';
+            errorEl.classList.remove('hidden');
+            return false;
+        }
+        if (!currentSelectId) {
+            errorEl.textContent = 'Erreur: select cible inconnu.';
+            errorEl.classList.remove('hidden');
+            return false;
+        }
+        var fd = new FormData();
+        fd.append('name', name);
+        var code = codeInput && (codeInput.value || '').trim();
+        if (code) fd.append('code', code);
+        fd.append('csrfmiddlewaretoken', getCsrf());
+        fetch(ajaxUrl, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, status: r.status, data: data }; }); })
+        .then(function(result) {
+            if (result.ok && result.data && result.data.name) {
+                var sel = document.getElementById(currentSelectId);
+                if (sel) {
+                    var val = currentValueType === 'name' ? result.data.name : String(result.data.id);
+                    var opt = document.createElement('option');
+                    opt.value = val;
+                    opt.textContent = result.data.name;
+                    sel.appendChild(opt);
+                    sel.value = val;
+                    sel.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                hideModal();
+            } else {
+                errorEl.textContent = (result.data && result.data.error) ? result.data.error : 'Erreur lors de la création.';
+                errorEl.classList.remove('hidden');
+            }
+        })
+        .catch(function() {
+            errorEl.textContent = 'Erreur réseau.';
+            errorEl.classList.remove('hidden');
+        });
+        return false;
+    });
+})();
+</script>
+
+<!-- Modal global : création Hôpital/Pharmacie rapide -->
+<div id="hospital-create-modal-global" class="fixed inset-0 z-50 hidden" aria-modal="true" role="dialog" aria-labelledby="hospital-create-modal-title">
+    <div class="fixed inset-0 bg-slate-900/60" data-hospital-modal-close></div>
+    <div class="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-xl">
+        <h3 id="hospital-create-modal-title" class="text-lg font-semibold text-slate-900 mb-4">Nouvel établissement (création rapide)</h3>
+        <p class="text-xs text-slate-500 mb-4">Complétez la fiche (adresse, contact…) depuis Hôpitaux / Pharmacies après enregistrement.</p>
+        <form id="hospital-create-ajax-form-global" class="space-y-4">
+            <div>
+                <label for="hospital-create-type-global" class="block text-sm font-medium text-slate-700 mb-1">Type <span class="text-red-500">*</span></label>
+                <select id="hospital-create-type-global" name="establishment_type" required class="no-tom-select block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm">
+                    <option value="HOSPITAL">Hôpital / Clinique</option>
+                    <option value="PHARMACY">Pharmacie</option>
+                </select>
+            </div>
+            <div>
+                <label for="hospital-create-name-global" class="block text-sm font-medium text-slate-700 mb-1">Raison sociale / Nom <span class="text-red-500">*</span></label>
+                <input type="text" id="hospital-create-name-global" name="name" required maxlength="120" placeholder="Ex: Clinique du Parc" class="block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="hospital-create-code-global" class="block text-sm font-medium text-slate-700 mb-1">Code (optionnel)</label>
+                <input type="text" id="hospital-create-code-global" name="code" maxlength="30" placeholder="Ex: CLIPARC" class="block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm">
+            </div>
+            <p id="hospital-create-error-global" class="text-sm text-red-600 hidden"></p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" data-hospital-modal-close class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</button>
+                <button type="submit" class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-500">Créer</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+(function() {
+    var modal = document.getElementById('hospital-create-modal-global');
+    var form = document.getElementById('hospital-create-ajax-form-global');
+    if (!modal || !form) return;
+    var typeSelect = document.getElementById('hospital-create-type-global');
+    var nameInput = document.getElementById('hospital-create-name-global');
+    var codeInput = document.getElementById('hospital-create-code-global');
+    var errorEl = document.getElementById('hospital-create-error-global');
+    var currentSelectId = null;
+    var ajaxUrl = "{% url 'hospital_create_ajax' %}";
+
+    function getCsrf() {
+        var el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        return el ? el.value : '';
+    }
+    function showModal(selectId) {
+        currentSelectId = selectId || null;
+        errorEl.classList.add('hidden');
+        errorEl.textContent = '';
+        if (typeSelect) typeSelect.value = 'HOSPITAL';
+        if (nameInput) nameInput.value = '';
+        if (codeInput) codeInput.value = '';
+        modal.classList.remove('hidden');
+        if (nameInput) nameInput.focus();
+    }
+    function hideModal() {
+        modal.classList.add('hidden');
+    }
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.hospital-create-trigger');
+        if (!btn) return;
+        e.preventDefault();
+        showModal(btn.getAttribute('data-select-id'));
+    });
+    modal.querySelectorAll('[data-hospital-modal-close]').forEach(function(el) {
+        el.addEventListener('click', hideModal);
+    });
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        errorEl.classList.add('hidden');
+        var name = (nameInput && nameInput.value || '').trim();
+        if (!name) {
+            errorEl.textContent = 'Le nom est requis.';
+            errorEl.classList.remove('hidden');
+            return false;
+        }
+        if (!currentSelectId) {
+            errorEl.textContent = 'Erreur: select cible inconnu.';
+            errorEl.classList.remove('hidden');
+            return false;
+        }
+        var fd = new FormData();
+        fd.append('name', name);
+        fd.append('establishment_type', (typeSelect && typeSelect.value) || 'HOSPITAL');
+        var code = codeInput && (codeInput.value || '').trim();
+        if (code) fd.append('code', code);
+        fd.append('csrfmiddlewaretoken', getCsrf());
+        fetch(ajaxUrl, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, status: r.status, data: data }; }); })
+        .then(function(result) {
+            if (result.ok && result.data && result.data.id != null) {
+                var sel = document.getElementById(currentSelectId);
+                if (sel) {
+                    var opt = document.createElement('option');
+                    opt.value = String(result.data.id);
+                    opt.textContent = result.data.name;
+                    sel.appendChild(opt);
+                    sel.value = opt.value;
+                    sel.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                hideModal();
+            } else {
+                errorEl.textContent = (result.data && result.data.error) ? result.data.error : 'Erreur lors de la création.';
+                errorEl.classList.remove('hidden');
+            }
+        })
+        .catch(function() {
+            errorEl.textContent = 'Erreur réseau.';
+            errorEl.classList.remove('hidden');
+        });
+        return false;
+    });
+})();
+</script>
+
+<!-- Tom Select Init -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('select:not(.no-tom-select)').forEach(function(el) {
+            new TomSelect(el, {
+                create: false,
+                sortField: { field: "text", direction: "asc" },
+                dropdownParent: "body"
+            });
+        });
+
+        // Œil afficher / masquer mot de passe
+        document.querySelectorAll('input[type="password"]').forEach(function(input) {
+            if (input.closest('.password-toggle-wrapper')) return;
+            var parent = input.parentElement;
+            var wrapper = document.createElement('div');
+            wrapper.className = 'password-toggle-wrapper relative';
+            parent.parentNode.insertBefore(wrapper, parent);
+            wrapper.appendChild(parent);
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'password-toggle-btn';
+            btn.setAttribute('aria-label', 'Afficher le mot de passe');
+            btn.innerHTML = '<i class="bi bi-eye text-lg"></i>';
+            btn.addEventListener('click', function() {
+                var icon = btn.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('bi-eye');
+                    icon.classList.add('bi-eye-slash');
+                    btn.setAttribute('aria-label', 'Masquer le mot de passe');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('bi-eye-slash');
+                    icon.classList.add('bi-eye');
+                    btn.setAttribute('aria-label', 'Afficher le mot de passe');
+                }
+            });
+            wrapper.appendChild(btn);
+        });
+    });
+</script>
+
+</body>
+</html>

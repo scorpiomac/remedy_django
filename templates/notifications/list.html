@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Moyens de notification - REMEDY{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Moyens de notification</h2>
+        <p class="mt-1 text-sm text-slate-500">Configurer et activer Email, SMS, WhatsApp pour les alertes et envois</p>
+    </div>
+</div>
+
+<div class="bg-white shadow-sm ring-1 ring-slate-900/5 rounded-2xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Canal</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Dernier test</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for cfg in channels %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            {% if cfg.channel == 'EMAIL' %}<i class="bi bi-envelope text-xl text-slate-400"></i>{% elif cfg.channel == 'SMS' %}<i class="bi bi-chat-dots text-xl text-slate-400"></i>{% else %}<i class="bi bi-whatsapp text-xl text-green-500"></i>{% endif %}
+                            <span class="text-sm font-medium text-slate-900">{{ cfg.get_channel_display }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if cfg.is_active %}
+                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">Actif</span>
+                        {% else %}
+                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Inactif</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-600">
+                        {% if cfg.last_tested_at %}
+                        {{ cfg.last_tested_at|date:"d/m/Y H:i" }}
+                        {% if cfg.last_test_error %}<span class="text-red-600" title="{{ cfg.last_test_error }}"> (échec)</span>{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{% url 'notification_edit' cfg.channel %}" class="inline-flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                            <i class="bi bi-gear"></i> Configurer
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-6 py-10 text-center text-sm text-slate-500">Aucun canal.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

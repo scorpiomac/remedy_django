@@ -1,0 +1,8 @@
+{% comment %}
+  Usage: {% include "includes/ipm_select_with_create.html" with select_id="id_ipm" %}
+  Optional: value_type="name" pour formulaire utilisateur (valeur = nom IPM), sinon value_type="id" (valeur = pk).
+  Le modal et le script AJAX sont dans base.html (hors formulaire) pour éviter soumission normale.
+{% endcomment %}
+<button type="button" class="ipm-create-trigger mt-2 inline-flex items-center gap-1.5 rounded-lg border border-brand-300 bg-white px-3 py-1.5 text-sm font-medium text-brand-700 hover:bg-brand-50 transition-colors" data-select-id="{{ select_id|default:'id_ipm' }}" data-value-type="{{ value_type|default:'id' }}">
+    <i class="bi bi-plus-circle text-brand-600"></i> Créer une IPM
+</button>

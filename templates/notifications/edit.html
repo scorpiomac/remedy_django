@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Configurer {{ config.get_channel_display }} - REMEDY{% endblock %}
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight">Configurer {{ config.get_channel_display }}</h2>
+        <p class="mt-1 text-sm text-slate-500">Activer le canal et renseigner les paramètres</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+        <a href="{% url 'notification_list' %}" class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-slate-300/50 hover:bg-slate-50">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
+
+<div class="max-w-2xl">
+    {% if form.non_field_errors %}
+    <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 flex items-start gap-3">
+        <i class="bi bi-exclamation-circle-fill text-red-500 flex-shrink-0 mt-0.5"></i>
+        <ul class="list-none space-y-1">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-6">
+                {{ form.is_active }}
+                <label for="id_is_active" class="text-sm font-medium text-slate-700">Activer ce canal de notification</label>
+            </div>
+
+            {% if channel_code == 'EMAIL' %}
+            <div class="space-y-4">
+                <h3 class="text-sm font-semibold text-slate-800 border-b border-slate-200 pb-2">Paramètres SMTP</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.email_host.label }}</label>
+                        {{ form.email_host }}
+                        {% if form.email_host.errors %}<p class="text-sm text-red-600 mt-1">{{ form.email_host.errors.0 }}</p>{% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.email_port.label }}</label>
+                        {{ form.email_port }}
+                    </div>
+                    <div class="flex items-center gap-2 pt-8">
+                        {{ form.email_use_tls }}
+                        <label for="id_email_use_tls" class="text-sm text-slate-700">{{ form.email_use_tls.label }}</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.email_user.label }}</label>
+                        {{ form.email_user }}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.email_password.label }}</label>
+                        {{ form.email_password }}
+                        <p class="text-xs text-slate-500 mt-1">Laisser vide pour conserver l'actuel</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.email_from.label }}</label>
+                        {{ form.email_from }}
+                    </div>
+                </div>
+            </div>
+            {% elif channel_code == 'SMS' %}
+            <div class="space-y-4">
+                <h3 class="text-sm font-semibold text-slate-800 border-b border-slate-200 pb-2">Paramètres API SMS</h3>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.sms_api_url.label }}</label>
+                    {{ form.sms_api_url }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.sms_api_key.label }}</label>
+                    {{ form.sms_api_key }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.sms_sender.label }}</label>
+                    {{ form.sms_sender }}
+                </div>
+            </div>
+            {% elif channel_code == 'WHATSAPP' %}
+            <div class="space-y-4">
+                <h3 class="text-sm font-semibold text-slate-800 border-b border-slate-200 pb-2">Paramètres API WhatsApp</h3>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.whatsapp_api_url.label }}</label>
+                    {{ form.whatsapp_api_url }}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.whatsapp_api_key.label }}</label>
+                    {{ form.whatsapp_api_key }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="bg-white shadow-sm ring-1 ring-slate-900/5 rounded-2xl p-6">
+            <h3 class="text-sm font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Modèle du message envoyé au destinataire</h3>
+            <p class="text-sm text-slate-600 mb-4">Personnalisez le texte que l'utilisateur recevra (ex. lien de validation). Vous pouvez utiliser les variables ci-dessous.</p>
+            {% if channel_code == 'EMAIL' %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.message_subject.label }}</label>
+                {{ form.message_subject }}
+                {% if form.message_subject.errors %}<p class="text-sm text-red-600 mt-1">{{ form.message_subject.errors.0 }}</p>{% endif %}
+            </div>
+            {% endif %}
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">{{ form.message_body.label }}</label>
+                {{ form.message_body }}
+                {% if form.message_body.errors %}<p class="text-sm text-red-600 mt-1">{{ form.message_body.errors.0 }}</p>{% endif %}
+                <p class="mt-2 text-xs text-slate-500">Variables possibles : <code class="bg-slate-100 px-1 rounded">{% templatetag openvariable %} patient_name {% templatetag closevariable %}</code>, <code class="bg-slate-100 px-1 rounded">{% templatetag openvariable %} verify_link {% templatetag closevariable %}</code>, <code class="bg-slate-100 px-1 rounded">{% templatetag openvariable %} claim_id {% templatetag closevariable %}</code></p>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:shadow-lg transition-all">
+                <i class="bi bi-check2-circle"></i> Enregistrer
+            </button>
+            <a href="{% url 'notification_list' %}" class="inline-flex items-center rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-200">Annuler</a>
+        </div>
+    </form>
+
+    <div class="mt-8 bg-white shadow-sm ring-1 ring-slate-900/5 rounded-2xl p-6">
+        <h3 class="text-base font-semibold text-slate-900 mb-3">Tester l'envoi</h3>
+        {% if channel_code == 'EMAIL' %}
+        <form method="post" action="{% url 'notification_test' channel_code %}" class="flex flex-wrap items-end gap-3">
+            {% csrf_token %}
+            <div class="min-w-[200px]">
+                <label for="test_destination" class="block text-sm font-medium text-slate-700 mb-1">Adresse email de test</label>
+                <input type="email" id="test_destination" name="test_destination" placeholder="test@exemple.com" class="block w-full rounded-xl border border-slate-300 py-2.5 px-4 text-slate-900 shadow-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 sm:text-sm">
+            </div>
+            <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-600">
+                <i class="bi bi-send"></i> Envoyer un test
+            </button>
+        </form>
+        {% else %}
+        <p class="text-sm text-slate-600">Le test d'envoi pour ce canal sera disponible après implémentation de l'API.</p>
+        {% endif %}
+        {% if config.last_tested_at %}
+        <p class="mt-3 text-xs text-slate-500">Dernier test : {{ config.last_tested_at|date:"d/m/Y H:i" }}{% if config.last_test_error %} — <span class="text-red-600">{{ config.last_test_error }}</span>{% endif %}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
